@@ -1,6 +1,6 @@
 # English → Khmer Neural Machine Translation: From Scratch vs. Frozen Backbone vs. Full Fine-Tuning
 
-**Author:** _‹your full name›_ ([@VimeanLav](https://github.com/VimeanLav))  
+**Author:** _‹Lav Vimean›_ ([@VimeanLav](https://github.com/VimeanLav))  
 **Course:** Deep Learning, Final Project (individual) · Bachelor of Software Engineering, Department of Engineering, Kirirom Institute of Technology  
 **Lecturer:** Mr. Soklong HIM · **Academic year:** 2026–2027
 
