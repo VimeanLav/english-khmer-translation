@@ -1,0 +1,11 @@
+{
+  "approach": "scratch",
+  "label": "A: Transformer from scratch",
+  "selection_metric": "validation chrF++",
+  "budget": "--epochs 3 --max-train-samples 80000",
+  "learning_rate": 0.001,
+  "dropout": 0.1,
+  "weight_decay": 0.01,
+  "val_chrf++": 96.7304,
+  "num_trials": 6
+}

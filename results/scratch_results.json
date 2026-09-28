@@ -1,0 +1,16 @@
+{
+  "approach": "scratch",
+  "model": "/content/drive/MyDrive/english-khmer-translation/models/scratch",
+  "source_lang": "eng_Latn",
+  "target_lang": "khm_Khmr",
+  "split": "test",
+  "num_samples": 5000,
+  "num_beams": 4,
+  "chrf++": 99.1298,
+  "chrf": 99.1577,
+  "bleu": 98.8563,
+  "bleu_tokenizer": "flores200",
+  "inference_seconds": 8.43,
+  "rescored_from": null,
+  "timestamp": "2026-09-28T06:42:34+00:00"
+}

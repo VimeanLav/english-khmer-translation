@@ -1,0 +1,11 @@
+{
+  "approach": "full",
+  "label": "C: NLLB full fine-tuning",
+  "selection_metric": "validation chrF++",
+  "budget": "--max-steps 300",
+  "learning_rate": 0.0001,
+  "dropout": 0.1,
+  "weight_decay": 0.01,
+  "val_chrf++": 80.1385,
+  "num_trials": 6
+}

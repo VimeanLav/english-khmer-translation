@@ -1,0 +1,108 @@
+{
+  "dataset": "SeyhaLite/Translate-English-Khmer-All",
+  "raw_rows": 366174,
+  "rows_after_cleaning": 323545,
+  "splits": {
+    "train": {
+      "examples": 258836,
+      "english_words": {
+        "mean": 7.4,
+        "median": 7.0,
+        "p95": 12.0,
+        "max": 17
+      },
+      "khmer_characters": {
+        "mean": 40.53,
+        "median": 38.0,
+        "p95": 72.0,
+        "max": 124
+      },
+      "nllb_source_tokens": {
+        "mean": 12.4,
+        "median": 12.0,
+        "p95": 18.0,
+        "max": 26
+      },
+      "nllb_target_tokens": {
+        "mean": 18.54,
+        "median": 18.0,
+        "p95": 30.0,
+        "max": 53
+      },
+      "khmer_with_spaces_pct": 73.13,
+      "khmer_with_zero_width_space_pct": 0.0,
+      "khmer_with_latin_letters_pct": 4.08,
+      "english_with_digits_pct": 2.2
+    },
+    "validation": {
+      "examples": 32354,
+      "english_words": {
+        "mean": 7.37,
+        "median": 7.0,
+        "p95": 12.0,
+        "max": 18
+      },
+      "khmer_characters": {
+        "mean": 40.25,
+        "median": 38.0,
+        "p95": 72.0,
+        "max": 109
+      },
+      "nllb_source_tokens": {
+        "mean": 12.35,
+        "median": 12.0,
+        "p95": 18.0,
+        "max": 26
+      },
+      "nllb_target_tokens": {
+        "mean": 18.43,
+        "median": 17.0,
+        "p95": 30.0,
+        "max": 48
+      },
+      "khmer_with_spaces_pct": 72.96,
+      "khmer_with_zero_width_space_pct": 0.0,
+      "khmer_with_latin_letters_pct": 4.15,
+      "english_with_digits_pct": 2.23
+    },
+    "test": {
+      "examples": 32355,
+      "english_words": {
+        "mean": 7.4,
+        "median": 7.0,
+        "p95": 12.0,
+        "max": 17
+      },
+      "khmer_characters": {
+        "mean": 40.5,
+        "median": 38.0,
+        "p95": 72.0,
+        "max": 111
+      },
+      "nllb_source_tokens": {
+        "mean": 12.41,
+        "median": 12.0,
+        "p95": 18.0,
+        "max": 25
+      },
+      "nllb_target_tokens": {
+        "mean": 18.52,
+        "median": 18.0,
+        "p95": 30.0,
+        "max": 48
+      },
+      "khmer_with_spaces_pct": 73.35,
+      "khmer_with_zero_width_space_pct": 0.0,
+      "khmer_with_latin_letters_pct": 4.05,
+      "english_with_digits_pct": 2.21
+    }
+  },
+  "removed_by_cleaning": 42629,
+  "overlap": {
+    "test_source_near_duplicate_of_train_pct": 0.05,
+    "test_reference_seen_in_train_pct": 3.11,
+    "test_sentences_with_unseen_english_word_pct": 0.1,
+    "english_train_vocabulary_size": 4102,
+    "note": "Exact English duplicates were removed before splitting; these figures measure the remaining near-duplicates (case/punctuation) and shared Khmer references."
+  }
+}
