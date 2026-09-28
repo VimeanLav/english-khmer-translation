@@ -1,0 +1,30 @@
+# Datasets (downloaded and tokenized; rebuild with `python -m src.data`)
+data/raw/
+data/processed/
+
+# Training checkpoints (several GB each)
+checkpoints/
+
+# Saved models: NLLB models (~1.2 GB each) are hosted externally (see README).
+# The scratch model (~46 MB) is small enough to commit.
+models/*
+!models/scratch/
+models/scratch/spm.vocab
+
+# Zip bundle for uploading to Google Drive
+dist/
+
+# Python caches
+__pycache__/
+*.py[cod]
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Environment variables / secrets
+.env

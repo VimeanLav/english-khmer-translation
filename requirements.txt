@@ -1,0 +1,21 @@
+# Exact versions used for the experiments (Python 3.12/3.13).
+#
+# Local Windows + NVIDIA GPU: the default PyPI torch wheel is CPU-only, so install
+# the CUDA build FIRST, then the rest:
+#   pip install torch==2.11.0 --index-url https://download.pytorch.org/whl/cu128
+#   pip install -r requirements.txt
+# Verify the GPU with:  python src/check_gpu.py
+#
+# Google Colab: the notebook keeps Colab's preinstalled CUDA PyTorch and installs
+# everything else from this file (the torch version used is logged per run).
+torch==2.11.0
+transformers==5.17.0
+datasets==5.0.1
+accelerate==1.15.0
+sacrebleu==2.6.0
+sentencepiece==0.2.2
+numpy==2.4.4
+pandas==2.3.3
+matplotlib==3.10.9
+tqdm==4.70.1
+evaluate==0.4.6
