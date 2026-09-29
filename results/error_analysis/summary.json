@@ -108,48 +108,48 @@
     "frozen": {
       "label": "B: NLLB frozen backbone",
       "sentences": 5000,
-      "failures": 166,
-      "failure_rate_pct": 3.32,
+      "failures": 16,
+      "failure_rate_pct": 0.32,
       "categories": {
-        "exact_match": 3753,
-        "spacing_only": 34,
-        "partially_correct": 1047,
+        "exact_match": 4849,
+        "spacing_only": 3,
+        "partially_correct": 132,
         "empty_output": 0,
-        "wrong_script": 1,
-        "repetition_hallucination": 23,
-        "omission": 1,
+        "wrong_script": 0,
+        "repetition_hallucination": 1,
+        "omission": 0,
         "number_mismatch": 0,
-        "unseen_source_word": 4,
-        "lexical_semantic": 137
+        "unseen_source_word": 3,
+        "lexical_semantic": 12
       },
       "categories_pct": {
-        "exact_match": 75.06,
-        "spacing_only": 0.68,
-        "partially_correct": 20.94,
+        "exact_match": 96.98,
+        "spacing_only": 0.06,
+        "partially_correct": 2.64,
         "empty_output": 0.0,
-        "wrong_script": 0.02,
-        "repetition_hallucination": 0.46,
-        "omission": 0.02,
+        "wrong_script": 0.0,
+        "repetition_hallucination": 0.02,
+        "omission": 0.0,
         "number_mismatch": 0.0,
-        "unseen_source_word": 0.08,
-        "lexical_semantic": 2.74
+        "unseen_source_word": 0.06,
+        "lexical_semantic": 0.24
       },
       "chrf_by_source_length": {
         "1-4": {
           "sentences": 551,
-          "mean_sentence_chrf++": 78.09
+          "mean_sentence_chrf++": 96.57
         },
         "5-7": {
           "sentences": 2245,
-          "mean_sentence_chrf++": 89.22
+          "mean_sentence_chrf++": 98.74
         },
         "8-10": {
           "sentences": 1704,
-          "mean_sentence_chrf++": 93.89
+          "mean_sentence_chrf++": 99.47
         },
         "11-13": {
           "sentences": 401,
-          "mean_sentence_chrf++": 96.3
+          "mean_sentence_chrf++": 99.43
         },
         "14+": {
           "sentences": 99,
@@ -216,6 +216,6 @@
       "frozen",
       "full"
     ],
-    "sentences": 7
+    "sentences": 6
   }
 }

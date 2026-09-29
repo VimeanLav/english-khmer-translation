@@ -1,16 +1,16 @@
 {
   "approach": "frozen",
-  "model": "/content/drive/MyDrive/english-khmer-translation/models/nllb_frozen",
+  "model": "C:\\Users\\lavvi\\english-khmer-translation\\models\\nllb_frozen",
   "source_lang": "eng_Latn",
   "target_lang": "khm_Khmr",
   "split": "test",
   "num_samples": 5000,
   "num_beams": 4,
-  "chrf++": 93.821,
-  "chrf": 94.5915,
-  "bleu": 90.3811,
+  "chrf++": 99.3114,
+  "chrf": 99.4485,
+  "bleu": 99.2116,
   "bleu_tokenizer": "flores200",
-  "inference_seconds": 222.27,
+  "inference_seconds": 151.7,
   "rescored_from": null,
-  "timestamp": "2026-09-28T07:14:48+00:00"
+  "timestamp": "2026-09-28T13:03:10+00:00"
 }
