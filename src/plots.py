@@ -119,27 +119,32 @@ def plot_efficiency(results: dict[str, dict]) -> None:
             points.append((key, load_json(path)["trainable_params"], results[key]["chrf++"]))
     if len(points) < 2:
         return
-    fig, ax = plt.subplots(figsize=(7, 4), layout="constrained")
+    fig, ax = plt.subplots(figsize=(7.5, 4.2), layout="constrained")
     label_box = {"facecolor": "#fcfcfb", "edgecolor": "none", "pad": 1.5}
-    if "baseline" in results:
-        ax.axhline(results["baseline"]["chrf++"], color=APPROACH_COLORS["baseline"],
-                   linestyle=":", zorder=1)
-        # Anchor the label to the left edge of the axes (x in axes coords, y in data coords).
-        ax.text(0.01, results["baseline"]["chrf++"], "zero-shot reference", va="bottom",
-                transform=ax.get_yaxis_transform(), fontsize=8.5, color=TEXT_SECONDARY)
-    for key, params, chrf in points:
+    scores = [chrf for _, _, chrf in points]
+    # Zoom the y-axis onto the trained approaches so close scores stay distinguishable;
+    # the zero-shot score is far below, so it is stated in the title instead of plotted.
+    spread = max(max(scores) - min(scores), 1.0)
+    ax.set_ylim(min(scores) - 0.8 * spread, max(scores) + 0.8 * spread)
+    # Alternate labels above/below the points (in x order) so they never overlap.
+    for i, (key, params, chrf) in enumerate(sorted(points, key=lambda p: p[1])):
         ax.scatter(params, chrf, s=80, color=APPROACH_COLORS[key], zorder=3,
                    edgecolor="#fcfcfb", linewidth=2)
-        ax.annotate(f"{APPROACHES[key].label}\n{params / 1e6:.1f}M params · chrF++ {chrf:.1f}",
-                    (params, chrf), xytext=(8, -10), textcoords="offset points", fontsize=8.5,
-                    color=TEXT, bbox=label_box, zorder=4)
+        above = i % 2 == 1
+        ax.annotate(f"{APPROACHES[key].label}\n{params / 1e6:.1f}M params · chrF++ {chrf:.2f}",
+                    (params, chrf), xytext=(0, 12 if above else -12), textcoords="offset points",
+                    ha="center", va="bottom" if above else "top", fontsize=8.5, color=TEXT,
+                    bbox=label_box, zorder=4)
     ax.set_xscale("log")
+    ax.set_xlim(min(p for _, p, _ in points) / 3, max(p for _, p, _ in points) * 3)
     ax.xaxis.set_major_formatter(FuncFormatter(
         lambda x, _: f"{x / 1e9:g}B" if x >= 1e9 else f"{x / 1e6:g}M"))
     ax.set_xlabel("Trainable parameters (log scale)")
     ax.set_ylabel("Test chrF++")
-    ax.set_title("Parameter efficiency")
-    ax.margins(x=0.35, y=0.15)
+    title = "Parameter efficiency"
+    if "baseline" in results:
+        title += f"\n(zero-shot NLLB reference: {results['baseline']['chrf++']:.1f} chrF++, off this scale)"
+    ax.set_title(title, fontsize=11)
     save_figure(fig, "efficiency")
 
 
