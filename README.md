@@ -13,7 +13,12 @@ This project trains and compares **three deep-learning approaches** to translati
 | **C** | NLLB-200-distilled-600M, **full fine-tuning** | training strategy (transfer learning, all weights) | 615.1M |
 | ref. | Zero-shot NLLB-200-distilled-600M | *reference only*: not trained, so not counted as an approach (rubric §2) | 0 |
 
-> **Headline result.** On the same 5,000 held-out test sentences, all three trained approaches far exceed the zero-shot reference (chrF++ 40.5). Approach A scores highest (chrF++ **99.13**), and C nearly matches it (**98.42**) after seeing about 120× fewer training examples. The test set is in-domain and highly templated, though, and A generalises poorly outside it (§9, §10). Every number in this report is produced by the code in this repository and saved under [`results/`](results/).
+> **Headline result.** On the same 5,000 held-out test sentences, all three trained approaches far exceed the zero-shot reference (chrF++ 40.5).
+> - **B, the frozen backbone, scores highest** (chrF++ **99.31**) while training only 8.2% of NLLB's parameters for one epoch.
+> - **A, the scratch model**, follows closely (**99.13**).
+> - **C, full fine-tuning**, reaches **98.42** from about 8–120× fewer training examples than the others.
+>
+> The test set is in-domain and highly templated, and A generalises poorly outside it (§9, §10). Every number in this report is produced by the code in this repository and saved under [`results/`](results/).
 
 ---
 
@@ -95,7 +100,8 @@ A standard encoder-decoder Transformer (Vaswani et al., 2017), implemented with 
 
 ### B: NLLB with a frozen backbone (`src/train_frozen.py`)
 [NLLB-200-distilled-600M](https://huggingface.co/facebook/nllb-200-distilled-600M) is a 615M-parameter multilingual Transformer pretrained on 200 languages, including Khmer. **Everything is frozen except the 12 decoder cross-attention blocks** (and their layer norms), which is 50.4M parameters (8.2%). Cross-attention is the only place where the decoder reads the encoded English sentence, so adapting it retargets the source–target alignment while keeping the pretrained language knowledge fixed. The output layer is **not** unfrozen: NLLB ties it to the 256k-token embedding matrix (262M parameters), so training it would also change every input embedding.
-- AdamW, lr 1e-4, weight decay 0.01, linear warmup (10%) + decay, fp16, effective batch 16 (8 × 2 accumulation), 4,000 steps.
+- AdamW, lr 1e-4, dropout 0.1, weight decay 0.01, linear warmup (10%) + decay, fp16, effective batch 16 (8 × 2 accumulation), **16,000 steps**. That is 256k sentence pairs, about one epoch.
+- The first run used 4,000 steps (64k pairs). Its validation chrF++ was still rising at the end (§7), so B was retrained with a 4× budget. The 4,000-step run is kept as an ablation (§6, [`results/ablations/frozen_4000_steps/`](results/ablations/frozen_4000_steps/)).
 
 *Why:* parameter-efficient transfer learning, the translation analogue of a "linear probe / frozen backbone".
 
@@ -121,14 +127,16 @@ The pretrained model used as-is with the `khm_Khmr` target tag. It shows what pr
 **Evaluation protocol: identical for every approach** (`src/evaluate.py`):
 - The same **5,000 held-out test sentences** (the first 5,000 of the shuffled, fixed test split; `TEST_EVAL_SIZE` in `src/config.py`). Pass `--max-samples -1` for all 32,355.
 - The same decoding: **beam search with 4 beams**, at most 128 new tokens.
-- The test set is used **only once per approach, for the final numbers**. Checkpoint selection, early stopping and hyperparameter tuning all use the **validation** set (the first 1,000 validation sentences during training, 500 per tuning trial).
+- The test set is used **only for final numbers**. Checkpoint selection, early stopping and hyperparameter tuning all use the **validation** set (the first 1,000 validation sentences during training, 500 per tuning trial).
+- The single exception is B, which was scored on the test set twice: once for the 4,000-step run (kept as an ablation) and once for the final 16,000-step run. The decision to train B longer was based on its **validation** curve still rising, not on its test score.
 
 **Training budget.** Budgets are fixed so that the whole project fits in a few hours on a free Colab T4 (rubric §3.3):
-| | Batch (pairs/step) | Budget | s/step (T4, final runs) | Train time (T4) | Wall time incl. validation + checkpoints | s/step (RTX 4070 Laptop, dev) |
+| | Batch (pairs/step) | Budget | GPU | s/step | Train time | Wall time incl. validation + checkpoints |
 |---|---|---|---|---|---|---|
-| A | 128 | 15 epochs, early-stopping patience 3 (not triggered) | 0.043 | 21.8 min | 23.9 min | 0.08 |
-| B | 16 | 4,000 steps (64k pairs) | 0.202 | 13.5 min | 25.8 min | 0.25 |
-| C | 16 | 2,000 steps (32k pairs) | 0.826 | 27.5 min | 37.7 min | 1.17 |
+| A | 128 | 15 epochs (3.88M pairs), early-stopping patience 3 (not triggered) | Tesla T4 | 0.043 | 21.8 min | 23.9 min |
+| B | 16 | 16,000 steps (256k pairs ≈ 1 epoch) | RTX 4070 Laptop | 0.231 | 61.6 min | 75.0 min |
+| B (ablation) | 16 | 4,000 steps (64k pairs) | Tesla T4 | 0.202 | 13.5 min | 25.8 min |
+| C | 16 | 2,000 steps (32k pairs) | Tesla T4 | 0.826 | 27.5 min | 37.7 min |
 
 "Train time" counts optimizer steps only. Tuning added 6 trials × ~1.3 min for A and 6 × ~4.1 min for C. Source: `results/<approach>_train_summary.json` and `results/tuning/*_trials.csv`.
 
@@ -140,7 +148,11 @@ The pretrained model used as-is with the `khm_Khmr` target tag. It shows what pr
   - B and C: the Hugging Face `Trainer` checkpoints every 500–1,000 steps (optimizer, scheduler and RNG states via `torch.save`, weights via safetensors) and resumes with `--resume`.
   - Training-time totals are also saved with each checkpoint, so reported times stay correct across Colab disconnects.
 
-**Hardware.** All final experiments ran on Google Colab with an **NVIDIA Tesla T4** (14.6 GB), Python 3.13.15, PyTorch 2.11.0 and CUDA 12.8, as logged in each `results/<approach>_train_summary.json`. Development and smoke tests used an NVIDIA RTX 4070 Laptop GPU (8 GB) on Windows 11.
+**Hardware.** Each run's hardware is logged in its `results/<approach>_train_summary.json`.
+- **A, C and B's 4,000-step ablation** ran on Google Colab with an **NVIDIA Tesla T4** (14.6 GB): Python 3.13.15, PyTorch 2.11.0, CUDA 12.8.
+- **B's final 16,000-step run** ran locally on an **NVIDIA RTX 4070 Laptop GPU** (8 GB, 55 W power limit), with the same PyTorch and CUDA versions. The Colab free-tier GPU quota had been used up.
+- The scores do not depend on the GPU, but the timings do. On identical B steps the laptop took about 14% longer per step than the T4 (0.231 vs 0.202 s/step).
+- Development and smoke tests also used the RTX 4070 Laptop GPU, on Windows 11.
 
 ## 5. Results
 
@@ -149,11 +161,12 @@ Generated by `python -m src.compare` ([`results/comparison.md`](results/comparis
 | Approach | chrF++ ↑ | chrF ↑ | BLEU ↑ | Trainable / total params | Train steps | Pairs seen | Train time | s / step | Peak VRAM | Test inference (5,000 sent.) |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
 | Zero-shot NLLB-600M (reference) | 40.53 | 50.31 | 13.69 | 0 / 615.1M | – | – | – | – | – | – |
-| **A: Transformer from scratch** | **99.13** | **99.16** | **98.86** | 11.5M / 11.5M | 30,345 | 3.88M | 0:21:45 | 0.043 | 1.63 GB | 8 s |
-| B: NLLB frozen backbone | 93.82 | 94.59 | 90.38 | 50.4M / 615.1M | 4,000 | 64k | 0:13:27 | 0.202 | 5.18 GB | 222 s |
+| A: Transformer from scratch | 99.13 | 99.16 | 98.86 | 11.5M / 11.5M | 30,345 | 3.88M | 0:21:45 | 0.043 | 1.63 GB | 8 s |
+| **B: NLLB frozen backbone** | **99.31** | **99.45** | **99.21** | 50.4M / 615.1M | 16,000 | 256k | 1:01:34 † | 0.231 † | 5.18 GB | 152 s † |
 | C: NLLB full fine-tuning | 98.42 | 98.71 | 98.09 | 615.1M / 615.1M | 2,000 | 32k | 0:27:32 | 0.826 | 6.66 GB | 149 s |
+| *B, 4,000-step ablation* | *93.82* | *94.59* | *90.38* | *50.4M / 615.1M* | *4,000* | *64k* | *0:13:27* | *0.202* | *5.18 GB* | *222 s* |
 
-*Same 5,000 held-out test sentences for every approach, beam search with 4 beams, all on a Tesla T4. BLEU is spBLEU (sacreBLEU `flores200` tokenizer). "Pairs seen" = steps × batch size. Train time counts optimizer steps only. The zero-shot row re-scores the translations from an earlier run of the same model on the same sentences (`--from-predictions`), so it has no inference time.*
+*Same 5,000 held-out test sentences for every approach, with beam search (4 beams). BLEU is spBLEU (sacreBLEU `flores200` tokenizer). "Pairs seen" = steps × batch size. Train time counts optimizer steps only. † measured on the RTX 4070 Laptop GPU; all other timings are on a Tesla T4 (§4). The zero-shot row re-scores translations from an earlier run of the same model on the same sentences (`--from-predictions`), so it has no inference time.*
 
 **Comparison figures** (generated by `python -m src.plots`):
 
@@ -161,11 +174,11 @@ Generated by `python -m src.compare` ([`results/comparison.md`](results/comparis
 ![Parameter efficiency](results/figures/efficiency.png)
 
 **Summary.**
-- **Training matters enormously.** Every trained approach far exceeds zero-shot NLLB (+53 to +59 chrF++).
-- **A (from scratch) has the best scores** (99.13 chrF++), 0.7 above C.
-- **C nearly matches A with far less data.** It reached 98.42 after seeing only **32k sentence pairs**, about 120× fewer than A's 3.9M (15 epochs).
-- **B is the cheapest to train** (13.5 min, 8.2% of parameters trainable), but it trails C by 4.6 chrF++.
-- **A is the cheapest to run.** Translating the test set took 8 s, against 149–222 s for the 615M-parameter NLLB models.
+- **Training matters enormously.** Every trained approach far exceeds zero-shot NLLB (+58 to +59 chrF++).
+- **B (frozen backbone) has the best scores** (99.31 chrF++, 99.21 BLEU) after one epoch, while updating only 8.2% of NLLB's parameters. The top three are close: B leads A by 0.18 chrF++ and C by 0.89.
+- **Budget decided B's result.** With a quarter of the data (4,000 steps, 64k pairs), B scored only 93.82. Training 4× longer added **+5.5 chrF++** and **+8.8 BLEU**, confirming that the first run was undertrained (§7).
+- **C learns fastest from data.** It reached 98.42 after only **32k sentence pairs**: 8× fewer than B and about 120× fewer than A (3.88M pair-passes over 15 epochs).
+- **A is the cheapest to run.** Translating the test set took 8 s, against about 150 s for the 615M-parameter NLLB models.
 
 ## 6. Hyperparameter tuning
 
@@ -195,6 +208,15 @@ Approach B was not tuned and uses its defaults (lr 1e-4, dropout 0.1).
 - **Regularization:** dropout 0.3 was **always worse** than 0.1, by 4.5 to 23.8 chrF++. Under these short budgets the models are still **underfitting**, so extra regularization only slows learning, and there is no overfitting for it to counteract.
 - **Caveat:** short trials favour settings that converge quickly (high learning rate, low dropout). With much longer training the ranking could change (§10).
 
+**Training-budget ablation (approach B).** B's first run was stopped at 4,000 steps while its validation curve was still rising, so it was retrained from scratch with a 4× budget. Everything else was kept the same (lr 1e-4, dropout 0.1, 10% warmup). Source: [`results/ablations/frozen_4000_steps/`](results/ablations/frozen_4000_steps/) vs. `results/frozen_*`.
+
+| B budget | Pairs seen | Best val chrF++ | Test chrF++ | Test BLEU | Exact matches |
+|---|---:|---:|---:|---:|---:|
+| 4,000 steps | 64k | 93.36 | 93.82 | 90.38 | 75.1% |
+| **16,000 steps** | **256k** | **99.48** | **99.31** | **99.21** | **97.0%** |
+
+The model's capacity was not the bottleneck: the frozen backbone was simply undertrained. The budget (the number of training steps, which the rubric counts as a hyperparameter) had a larger effect than any learning-rate or dropout setting.
+
 ## 7. Learning curves: over- / underfitting
 
 ![Learning curves](results/figures/learning_curves.png)
@@ -203,12 +225,16 @@ Approach B was not tuned and uses its defaults (lr 1e-4, dropout 0.1).
 **None of the three approaches overfits.** In every run, validation loss falls alongside training loss and never rises.
 
 - **A (scratch):** training loss falls from 9.3 to about 1.5 within the first epoch (~260k pairs). Validation loss then decreases slowly, from 1.68 to 1.45, through epoch 15. Validation chrF++ still improved at the last epoch (99.19), so early stopping never triggered (`best_epoch` = 15). A is converging but not overfitting. Its loss levels off near 1.45 rather than 0 because of **label smoothing (0.1)**. For the same reason, A's loss values are not comparable with B's and C's, which have no label smoothing.
-- **B (frozen backbone):** validation loss falls from 0.66 to 0.12, and chrF++ is **still rising at the end** (93.4). B is limited by its training budget: more steps would likely help. Its validation loss sits below the training loss because dropout is active only during training, and each logged training loss is an average over the preceding 50 steps.
+- **B (frozen backbone):**
+  - In the first, 4,000-step run, validation chrF++ was **still rising at the end** (93.4), a sign of **underfitting / too small a budget**. This motivated the longer run.
+  - In the final 16,000-step run, validation loss falls from 0.23 to 0.017, and chrF++ rises from 87.9 to **99.48**. It **plateaus over the last 4,000 steps** (99.41 → 99.48 → 99.48), so B has now converged, with no sign of overfitting.
+  - Its validation loss sits below the training loss because dropout is active only during training, and each logged training loss is an average over the preceding 50 steps.
 - **C (full fine-tuning):** validation loss falls from 0.43 to 0.036, and chrF++ rises from 77 to 98.3, flattening over the last 500 steps. C is close to converged within its budget, with no overfitting.
 - **Sample efficiency** (`val_chrf_curves.png`, log scale):
   - C reaches **90.0** chrF++ after **8k** training pairs and 93.8 after 12k.
-  - B needs **32k** pairs to reach 90.5.
+  - B, in the 16k-step run, is at 87.9 after 32k pairs, 96.0 after 64k and 99.5 after 256k. Its early points are lower partly because the longer schedule warms up for 1,600 steps.
   - A is already at 96.2 after its first epoch, but that is **259k** pairs.
+  - So **C learns the most per training example, B reaches the highest final score, and A needs by far the most data.**
 
 ## 8. Error analysis
 
@@ -237,20 +263,22 @@ Concrete failed examples per approach are in [`results/error_analysis/`](results
 
 | | Zero-shot | A: scratch | B: frozen | C: full FT |
 |---|---:|---:|---:|---:|
-| exact match | 0.04 | **95.76** | 75.06 | 92.50 |
-| spacing only (content correct) | 1.66 | 0.06 | 0.68 | 0.20 |
-| partially correct (chrF++ ≥ 40) | 46.36 | 3.30 | 20.94 | 6.52 |
-| **failures (chrF++ < 40)** | **51.94** | **0.88** | **3.32** | **0.78** |
-| of which lexical / semantic | 45.36 | 0.66 | 2.74 | 0.64 |
-| of which repetition / hallucination | 5.74 | 0.02 | 0.46 | 0.04 |
-| of which wrong script / number / omission / unseen word | 0.84 | 0.20 | 0.12 | 0.10 |
+| exact match | 0.04 | 95.76 | **96.98** | 92.50 |
+| spacing only (content correct) | 1.66 | 0.06 | 0.06 | 0.20 |
+| partially correct (chrF++ ≥ 40) | 46.36 | 3.30 | 2.64 | 6.52 |
+| **failures (chrF++ < 40)** | **51.94** | **0.88** | **0.32** | **0.78** |
+| of which lexical / semantic | 45.36 | 0.66 | 0.24 | 0.64 |
+| of which repetition / hallucination | 5.74 | 0.02 | 0.02 | 0.04 |
+| of which wrong script / number / omission / unseen word | 0.84 | 0.20 | 0.06 | 0.10 |
 
-**By sentence length** (`chrf_by_length.png`), **short sentences (1–4 English words, n = 551) are the hardest for every model**: A scores 95.5, B 78.1 and C 92.2, against 99–100 on sentences of 11+ words. The short ones are colloquial or idiomatic (*"No spicy please."*) and give the model little context. The long ones mostly follow a few rigid templates.
+*(B = final 16,000-step model. The 4,000-step ablation had 75.06% exact matches and 3.32% failures.)*
+
+**By sentence length** (`chrf_by_length.png`), **short sentences (1–4 English words, n = 551) are the hardest for every model**: A scores 95.5, B 96.6 and C 92.2, against 99–100 on sentences of 11+ words. The short ones are colloquial or idiomatic (*"No spicy please."*) and give the model little context. The long ones mostly follow a few rigid templates.
 
 **Representative failures and likely causes** (full lists in [`results/error_analysis/`](results/error_analysis/)):
 1. **Register and spacing mismatch (zero-shot).**
    - The pretrained model writes formal Khmer with spaces between words. The references are mostly colloquial, with few spaces.
-   - Example: *"My boyfriend is angry."* → `មិត្ត ប្រុស របស់ ខ្ញុំ មាន កំហឹង` (literally "male friend of mine has anger"). The reference is `សង្សារកំពុងខឹង`.
+   - Example: *"My boyfriend is angry."* → `មិត្ត ប្រុស របស់ ខ្ញុំ មាន កំហឹង` (literally "male friend of mine has anger"). The reference is `សង្សារកំពុងខឹង`. After training, B produces exactly `សង្សារកំពុងខឹង`: it learned the corpus's colloquial register while its language knowledge stayed frozen.
    - This explains most of the zero-shot model's 45% "lexical / semantic" failures. For 83 sentences (1.7%), the only difference is spacing.
 2. **Attention drift (zero-shot).**
    - On a long formal sentence, *"Graduates must identify project management collaboratively."*, the decoder falls into a loop, repeating `និស្សិត` ("student") until the length limit.
@@ -263,9 +291,9 @@ Concrete failed examples per approach are in [`results/error_analysis/`](results
    - When a source word was rare in training, A produces degenerate subword strings: *"Surprising my mom with a gift."* → `ការចេញ្ញ្ញ្ញ្ញ្ត្ញ្ញ`.
    - It can also leak an English piece: *"We should stop fishing."* → `យើងគួរឈប់ good`.
    - A learned its vocabulary only from this corpus, so it has no fallback for unfamiliar words. The pretrained models (B, C) translate both sentences correctly.
-5. **Reference noise, not model errors.** Only **7 of 5,000** sentences are failed by all three trained models ([`hard_for_all.md`](results/error_analysis/hard_for_all.md)), and most are problems with the reference:
-   - *"It is raining."*: C's `ភ្លៀងកំពុងធ្លាក់` ("rain is falling") is correct but differs from the single reference `ភ្លៀងហើយ`.
-   - *"We should stop fishing."*: B and C use the valid synonym `នេសាទ`, while the reference uses `ស្ទូចត្រី`.
+5. **Reference noise, not model errors.** Only **6 of 5,000** sentences are failed by all three trained models ([`hard_for_all.md`](results/error_analysis/hard_for_all.md)), and most are problems with the reference:
+   - *"It is raining."*: B and C both output `ភ្លៀងកំពុងធ្លាក់` ("rain is falling"). That is correct, but it differs from the single reference `ភ្លៀងហើយ`.
+   - *"No spicy please."*: B and C output `កុំហឹរផង` ("please don't make it spicy"; B uses the corpus's spelling `ហិរ`). That is a natural request, but the reference is `អត់យកហិរទេ`.
    - *"Do you prefer lime or lime?"*: the reference translates "lime" as the colour.
    - Two references keep English words ("Ick", "Surprise").
 
@@ -273,29 +301,53 @@ Concrete failed examples per approach are in [`results/error_analysis/`](results
 
 ## 9. Discussion: why the best approach wins
 
-**Ranking on this test set:** A (99.13) > C (98.42) > B (93.82) ≫ zero-shot (40.53).
+**Ranking on this test set:** B (99.31) > A (99.13) > C (98.42) ≫ zero-shot (40.53). The top three lie within 0.9 chrF++ of each other. They differ far more in **how much data, compute and trainable capacity** each needed, and in what each is likely to do outside this corpus.
 
-**Why A wins here: the test set rewards memorising the training distribution.** The corpus is narrow (a 4,102-word English vocabulary) and template-generated. A therefore reproduces the reference *character for character* for 95.8% of test sentences. With 15 passes over 259k pairs, a small Transformer has more than enough **capacity** (11.5M parameters) to learn this template grammar. Its **SentencePiece vocabulary was built from the same corpus**, so it matches the corpus's colloquial spelling (`ញុម`) and spacing conventions exactly. The seq2seq Transformer's **inductive bias** for aligning source and target tokens needs no prior knowledge when the mapping is this regular.
+**Why B wins: transfer learning with a strong prior and enough data.**
+- **What B keeps:** 92% of NLLB's weights stay exactly as pretrained. These are the embeddings, the encoder, and the decoder's self-attention and feed-forward layers, which hold its knowledge of English, Khmer script and Khmer grammar.
+- **What B learns:** only cross-attention is trained, the part that decides *which source words to look at while writing each Khmer word*.
+- **Why that is enough:** the zero-shot model's errors are mostly register, spacing and word choice rather than meaning (§8, failure 1). Re-aligning cross-attention over one epoch of in-domain data fixes them: exact matches rise from 0.04% to **97.0%**, the highest of any approach, with the fewest failures (0.32%).
+- **Why freezing helps:** it acts as a strong **inductive bias / regularizer**. With only 50M trainable parameters and the rest fixed, B can adapt to the corpus but cannot overwrite the language knowledge stored in its frozen weights.
+- **Budget was the key factor.** The same setup scored only 93.82 after 64k pairs (§6 ablation). The frozen backbone needs more data than full fine-tuning to adapt, because fewer parameters change per step.
 
-**Why C almost matches A with about 120× less data: transfer learning.** NLLB was pretrained on 200 languages and already knows Khmer script, grammar and English meaning. Fine-tuning only has to adapt its **register and conventions** to this corpus. The zero-shot model's gap is mostly register, spacing and wording rather than meaning (§8, failure 1), and 2,000 steps close it: exact matches rise from 0.04% to 92.5%. This is **sample efficiency**: C reaches 90 chrF++ after only 8k training pairs. A's tuning trials needed 240k pair-passes (3 epochs over 80k pairs) to reach 89–97 on validation.
+**Why A comes close: the test set rewards learning the training distribution.**
+- The corpus is narrow (a 4,102-word English vocabulary) and template-generated, and A reproduces 95.8% of test references character for character.
+- With 15 passes over 259k pairs, a small Transformer has enough **capacity** (11.5M parameters) to learn this template grammar.
+- Its **SentencePiece vocabulary was built from this corpus**, so it matches the corpus's colloquial spelling (`ញុម`) and spacing exactly. The seq2seq Transformer's **inductive bias** for aligning source and target tokens needs no prior knowledge when the mapping is this regular.
 
-**Why B trails C: limited trainable capacity.** Freezing the embeddings, self-attention and feed-forward layers leaves only cross-attention to adapt, which is 8.2% of the parameters. B can re-align its attention to the source sentence but cannot fully change *how* it writes Khmer: the output layer is tied to the frozen embeddings. B has more partial matches (20.9% vs 6.5%) and fewer exact matches (75.1% vs 92.5%). It is also still improving when its budget ends (§7), so part of the gap is under-training. B remains the most **parameter-efficient** adaptation: +53 chrF++ over zero-shot while training 50M parameters in 13.5 minutes (`efficiency.png`).
+**Why C trails slightly: most sample-efficient, but the smallest budget.**
+- C adapts all 615M parameters. It reached 90 chrF++ after only 8k pairs and 98.42 after 32k, the best **sample efficiency** of the three.
+- It saw 8× less data than B, and its curve was still rising slowly at the end (§7), so the B–C gap reflects the budget as much as the method.
+- At *equal* data, C is clearly ahead: after 64k pairs, B scored 93.8 in its ablation and 96.0 on validation in the long run, against C's 98.4 after only 32k.
+- Full fine-tuning also costs more memory per step (6.7 GB vs 5.2 GB peak) and time per step (0.83 s vs 0.20 s on a T4).
 
-**Regularization.** In both tuned approaches, higher dropout was always worse (§6). With these budgets all models are **underfitting rather than overfitting**, which the learning curves confirm (§7). Stronger regularization only slows learning.
+**Regularization.** In both tuned approaches, higher dropout was always worse (§6). The learning curves show underfitting rather than overfitting (§7), so stronger regularization only slowed learning. The strongest "regularizer" in this study is freezing, which is B.
 
-**Which approach is best overall?** On this in-domain benchmark, A: it is the most accurate, cheapest to run (8 s for 5,000 sentences) and smallest (46 MB). But its advantage comes from matching the templates, not from general translation ability:
+**Which approach is best overall?** It depends on the constraint:
+
+| If what matters most is… | Best choice | Evidence |
+|---|---|---|
+| Highest quality on this corpus | **B** | 99.31 chrF++, 97.0% exact matches |
+| Least training data or time | **C** | 98.42 after 32k pairs and 27.5 min |
+| Smallest and fastest model to deploy | **A** | 46 MB, 8 s to translate 5,000 sentences |
+
+A's in-domain score, however, comes from learning the templates, not from general translation ability:
 - Its vocabulary and knowledge come only from this corpus, so it breaks down on rare words (§8, failure 4).
 - On a sentence outside the templates, *"The weather is very hot today."*, it produced `អាកាសធាតុនៅក្នុងខែ ក្តៅ គឺ ក្តៅ ណាស់` ("the weather in month hot is hot very").
 
-C keeps NLLB's broad knowledge while matching A in-domain almost exactly, so **C is the approach to recommend for real use**. A proper out-of-domain evaluation is needed to confirm this ranking (§10).
+B and C keep NLLB's broad multilingual knowledge. B leaves 92% of NLLB's weights untouched and retrains only its cross-attention. **B is therefore the approach to recommend**: it gives the best in-domain quality with the least risk of losing general ability. An out-of-domain evaluation is still needed to confirm this (§10).
 
 ## 10. Limitations and future work
 
 **Limitations**
-- **In-domain, templated test data (the main limitation).** The English vocabulary is only 4.1k words, 3.1% of test references also appear verbatim in training, and 92–96% of the best models' test outputs match the reference exactly. The scores therefore measure fit to this corpus's templates and **overestimate performance on open-domain text**. The A > C ranking in particular may reverse outside the templates (§9). That is untested here and is the first item of future work.
+- **In-domain, templated test data (the main limitation).** The English vocabulary is only 4.1k words, 3.1% of test references also appear verbatim in training, and 92–97% of the trained models' test outputs match the reference exactly. The scores therefore measure fit to this corpus's templates and **overestimate performance on open-domain text**. The ranking, in particular A's position relative to the NLLB-based B and C, may change outside the templates (§9). That is untested here and is the first item of future work.
 - **Automatic metrics against a single reference.** No human evaluation. Inconsistent Khmer spacing and colloquial spelling make even correct translations score imperfectly.
-- **Unequal and limited compute.** The approaches saw very different amounts of data (A: 3.9M pair-passes, B: 64k, C: 32k), so the comparison reflects each approach at a practical Colab budget, not at equal training. B was still improving when its budget ended. There is one seed per configuration, with no confidence intervals or significance tests.
-- **Tuning.** B was not tuned. A's and C's best learning rates lie at the edge of their grids. Short trials favour fast-converging settings.
+- **Unequal budgets.**
+  - The approaches saw very different amounts of data: A 3.88M pair-passes, B 256k, C 32k. So the ranking reflects each approach at its chosen budget, not at equal training.
+  - B was given a longer budget after its first run; C was not, and its curve was still rising slightly. The B > C result may not hold at equal budgets.
+- **Different hardware for B.** B's final run was trained on an RTX 4070 Laptop GPU because the Colab quota ran out; the others ran on a T4. Scores are unaffected, but B's timings are not directly comparable (§4).
+- **No statistics.** There is one seed per configuration, with no confidence intervals or significance tests. The top three differ by less than 1 chrF++, so their ranking in particular is not statistically established.
+- **Tuning.** B was not tuned for learning rate or dropout, only for its budget (§6). A's and C's best learning rates lie at the edge of their grids. Short trials favour fast-converging settings.
 - **Test subset.** 5,000 of the 32,355 test pairs are used, identical for all approaches, to keep beam-search evaluation within the Colab budget.
 - **License.** The NLLB weights are CC-BY-NC-4.0, so the fine-tuned models are for non-commercial use only.
 
@@ -304,7 +356,7 @@ C keeps NLLB's broad knowledge while matching A in-domain almost exactly, so **C
 2. Parameter-efficient fine-tuning (LoRA) as a fourth approach between B and C.
 3. Multiple seeds and bootstrap confidence intervals for the metric differences.
 4. Normalise Khmer spacing and spelling in the references, and add a human evaluation of a sample.
-5. Longer training and a larger scratch model to see whether A's gap closes with more compute.
+5. Train C for the same one-epoch budget as B, to compare full fine-tuning and the frozen backbone at equal data.
 
 ## 11. How to reproduce
 
@@ -372,6 +424,7 @@ Every training command accepts `--resume` to continue after an interruption. Eac
     ├── predictions/          every test translation (JSONL)
     ├── tuning/               tuning trials (CSV) and best configs
     ├── error_analysis/       category summary and examples
+    ├── ablations/            B's 4,000-step run (metrics, summary, curve, translations)
     └── figures/              all figures
 ```
 
@@ -380,7 +433,7 @@ Every training command accepts `--resume` to continue after an interruption. Eac
 | Approach | Size | Location |
 |---|---|---|
 | A: scratch | ~46 MB | [`models/scratch/`](models/scratch/) (in this repository) |
-| B: frozen backbone | ~1.2 GB (fp16) | ⏳ *Google Drive link to `models/nllb_frozen/`* |
+| B: frozen backbone (16,000-step final model) | ~1.2 GB (fp16) | ⏳ *Google Drive link to `models/nllb_frozen/`* |
 | C: full fine-tuning | ~1.2 GB (fp16) | ⏳ *Google Drive link to `models/nllb_full/`* |
 
 To evaluate downloaded weights, place them in `models/` and run `python -m src.evaluate --approach frozen` (or `full` / `scratch`).
@@ -413,5 +466,5 @@ To evaluate downloaded weights, place them in `models/` and run `python -m src.e
     - GPU-memory limits in full fine-tuning.
   - **Testing and setup:** Claude ran the local smoke tests and benchmarks, and uploaded the code to Google Drive for the Colab run.
   - **README:** Claude drafted this README, including the descriptions of the results, the error analysis and the discussion, from the generated result files.
-  - **Experiments:** the Colab experiments were run by the author.
+  - **Experiments:** the author ran the Colab experiments. B's final 16,000-step run was run by Claude on the author's laptop GPU, at the author's request, after the Colab GPU quota ran out. Claude then updated the results table, figures and this README.
 - **Verification:** ⏳ *Describe what you personally checked. For example: which files you read and can explain, that you reviewed sample translations in `results/predictions/`, and which parts of the analysis you rewrote in your own words.*
