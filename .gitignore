@@ -10,6 +10,11 @@ checkpoints/
 models/*
 !models/scratch/
 models/scratch/spm.vocab
+# Experiment 2: keep only the small scratch model.
+!models/augmented/
+models/augmented/*
+!models/augmented/scratch/
+models/augmented/scratch/spm.vocab
 
 # Zip bundle for uploading to Google Drive
 dist/
@@ -17,6 +22,9 @@ dist/
 # Python caches
 __pycache__/
 *.py[cod]
+
+# Editor settings (contain paths specific to this PC)
+.vscode/
 
 # Virtual environments
 .venv/

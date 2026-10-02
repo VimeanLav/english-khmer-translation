@@ -1,6 +1,6 @@
 # English → Khmer Neural Machine Translation: From Scratch vs. Frozen Backbone vs. Full Fine-Tuning
 
-**Author:** _‹Lav Vimean›_ ([@VimeanLav](https://github.com/VimeanLav))  
+**Author:** _Lav Vimean_ ([@VimeanLav](https://github.com/VimeanLav))  
 **Course:** Deep Learning, Final Project (individual) · Bachelor of Software Engineering, Department of Engineering, Kirirom Institute of Technology  
 **Lecturer:** Mr. Soklong HIM · **Academic year:** 2026–2027
 
@@ -18,7 +18,14 @@ This project trains and compares **three deep-learning approaches** to translati
 > - **A, the scratch model**, follows closely (**99.13**).
 > - **C, full fine-tuning**, reaches **98.42** from about 8–120× fewer training examples than the others.
 >
-> The test set is in-domain and highly templated, and A generalises poorly outside it (§9, §10). Every number in this report is produced by the code in this repository and saved under [`results/`](results/).
+> The test set is in-domain and highly templated, and A generalised poorly outside it (§9, §11).
+>
+> **Experiment 2** (§10) therefore retrained all three approaches with 18k professionally translated news sentences (ALT) added, and scored them on a second, out-of-domain news test set:
+> - Every approach improved out of domain: A by **+29.7** chrF++ (3.8 → 33.5), B by **+8.1** (34.5 → **42.6**) and C by **+7.5** (34.1 → 41.6).
+> - B and C now beat zero-shot NLLB on news text (36.1), which they did not before.
+> - In-domain scores stayed at 96.8–99.8.
+>
+> Every number in this report is produced by the code in this repository and saved under [`results/`](results/).
 
 ---
 
@@ -32,12 +39,13 @@ This project trains and compares **three deep-learning approaches** to translati
 7. [Learning curves](#7-learning-curves-over--underfitting)
 8. [Error analysis](#8-error-analysis)
 9. [Discussion: why the best approach wins](#9-discussion-why-the-best-approach-wins)
-10. [Limitations and future work](#10-limitations-and-future-work)
-11. [How to reproduce](#11-how-to-reproduce)
-12. [Repository structure](#12-repository-structure)
-13. [Model weights](#13-model-weights)
-14. [References](#14-references)
-15. [AI use disclosure](#15-ai-use-disclosure)
+10. [Experiment 2: adding out-of-domain data (ALT)](#10-experiment-2-adding-out-of-domain-data-alt)
+11. [Limitations and future work](#11-limitations-and-future-work)
+12. [How to reproduce](#12-how-to-reproduce)
+13. [Repository structure](#13-repository-structure)
+14. [Model weights](#14-model-weights)
+15. [References](#15-references)
+16. [AI use disclosure](#16-ai-use-disclosure)
 
 ---
 
@@ -206,7 +214,7 @@ Approach B was not tuned and uses its defaults (lr 1e-4, dropout 0.1).
 - **Best configurations:** A uses lr = 1e-3 with dropout = 0.1, and C uses lr = 1e-4 with dropout = 0.1. These were used for the final runs. C's tuned learning rate is 5× the common fine-tuning default of 2e-5.
 - **Learning rate:** in both grids, higher was better, and the best value is at the **upper edge** of the grid. The true optimum may therefore be higher. That is a limitation of this grid.
 - **Regularization:** dropout 0.3 was **always worse** than 0.1, by 4.5 to 23.8 chrF++. Under these short budgets the models are still **underfitting**, so extra regularization only slows learning, and there is no overfitting for it to counteract.
-- **Caveat:** short trials favour settings that converge quickly (high learning rate, low dropout). With much longer training the ranking could change (§10).
+- **Caveat:** short trials favour settings that converge quickly (high learning rate, low dropout). With much longer training the ranking could change (§11).
 
 **Training-budget ablation (approach B).** B's first run was stopped at 4,000 steps while its validation curve was still rising, so it was retrained from scratch with a 4× budget. Everything else was kept the same (lr 1e-4, dropout 0.1, 10% warmup). Source: [`results/ablations/frozen_4000_steps/`](results/ablations/frozen_4000_steps/) vs. `results/frozen_*`.
 
@@ -335,12 +343,90 @@ A's in-domain score, however, comes from learning the templates, not from genera
 - Its vocabulary and knowledge come only from this corpus, so it breaks down on rare words (§8, failure 4).
 - On a sentence outside the templates, *"The weather is very hot today."*, it produced `អាកាសធាតុនៅក្នុងខែ ក្តៅ គឺ ក្តៅ ណាស់` ("the weather in month hot is hot very").
 
-B and C keep NLLB's broad multilingual knowledge. B leaves 92% of NLLB's weights untouched and retrains only its cross-attention. **B is therefore the approach to recommend**: it gives the best in-domain quality with the least risk of losing general ability. An out-of-domain evaluation is still needed to confirm this (§10).
+B and C keep NLLB's broad multilingual knowledge. B leaves 92% of NLLB's weights untouched and retrains only its cross-attention. **B is therefore the approach to recommend**: it gives the best in-domain quality with the least risk of losing general ability. Experiment 2 (§10) tests this on out-of-domain news sentences. B again scores highest there, and A's weakness outside the templates is confirmed.
 
-## 10. Limitations and future work
+## 10. Experiment 2: adding out-of-domain data (ALT)
+
+**Motivation.** Experiment 1's main weakness is its templated test set (§2, §11). A qualitative check on everyday sentences outside the templates showed the problem clearly:
+- A often produced unreadable Khmer: *"i want to study english in my parents school"* → `ឪពុកម្តាយក្រុមទាមទាញុម។`.
+- B mistranslated common words: *"i want to kiss you"* → `ញុមចង់ផ្កាឯង។` ("I want flower you").
+
+Experiment 2 asks whether more varied training data fixes this, and measures it on a real out-of-domain test set.
+
+**What changed: only the data.**
+- **Added corpus:** [ALT](https://huggingface.co/datasets/mutiyama/alt), the Asian Language Treebank (Riza et al., 2016; CC-BY-4.0).
+  - English Wikinews sentences, professionally translated into standard written Khmer.
+  - Training pairs longer than 128 tokens were dropped, leaving 17,845 training, 1,000 validation and 1,018 test pairs.
+  - The sentences are about 3× longer than SeyhaLite's and use formal vocabulary.
+- **Training set:** SeyhaLite's 258,836 training pairs plus ALT's training pairs **repeated 3×**, so ALT makes up about 17% of the data. That gives **312,371 pairs**, shuffled.
+- **Validation set:** 1,000 SeyhaLite + 1,000 ALT validation pairs, so checkpoint selection and early stopping reward both domains. Validation scores are therefore much lower than in experiment 1 and are not comparable with them.
+- **Two test sets:**
+  1. The **same 5,000 in-domain SeyhaLite test sentences** as experiment 1.
+  2. ALT's **1,018-sentence news test set**, which is out-of-domain for experiment 1's models.
+
+  Experiment 1's models were also scored on ALT, so both experiments have both numbers.
+- **Everything else is identical:** architectures, the tuned hyperparameters from §6, step and epoch budgets, seed and decoding. All three models were trained on a Colab T4 with [`notebooks/colab_experiment2.ipynb`](notebooks/colab_experiment2.ipynb).
+- **Separate outputs:** the `EXPERIMENT=augmented` environment variable routes every output to `results/augmented/` and `models/augmented/`, so experiment 1's files are untouched.
+
+**Results** (`python -m src.compare_experiments` → [`results/experiments_comparison.md`](results/experiments_comparison.md)):
+
+![Experiment 1 vs. experiment 2](results/figures/experiments_comparison.png)
+
+| Approach | In-domain chrF++, Exp. 1 → Exp. 2 | Δ | **ALT news chrF++, Exp. 1 → Exp. 2** | **Δ** | ALT BLEU, Exp. 1 → Exp. 2 | ALT failures, Exp. 1 → Exp. 2 |
+|---|---:|---:|---:|---:|---:|---:|
+| Zero-shot NLLB (reference) | 40.53 | – | 36.06 | – | 8.88 | 66.6% |
+| A: Transformer from scratch | 99.13 → 99.79 | +0.66 | 3.81 → 33.46 | **+29.65** | 0.17 → 21.24 | 100% → 76.7% |
+| **B: NLLB frozen backbone** | 99.31 → 98.41 | −0.90 | 34.49 → **42.56** | **+8.07** | 21.18 → **32.38** | 73.4% → **42.3%** |
+| C: NLLB full fine-tuning | 98.42 → 96.78 | −1.64 | 34.10 → 41.61 | **+7.51** | 19.70 → 31.13 | 75.3% → 45.0% |
+
+*Failures are sentences with chrF++ < 40 (§8). Full tables with chrF and training costs: [`results/augmented/comparison.md`](results/augmented/comparison.md) (in-domain) and [`comparison_alt.md`](results/augmented/comparison_alt.md) (ALT); experiment 1 on ALT: [`results/comparison_alt.md`](results/comparison_alt.md). Error analyses and figures for experiment 2 are in [`results/augmented/`](results/augmented/). Training costs on the T4: A 36,615 steps in 71.5 min, B 16,000 steps in 69.8 min, C 2,000 steps in 30.3 min. A's steps are slower than in experiment 1 because ALT's sentences are longer.*
+
+**Findings**
+1. **Adding ALT improved every trained approach out of domain.**
+   - chrF++ rose by +29.7 (A), +8.1 (B) and +7.5 (C), and spBLEU by about 11 points for B and C.
+   - Failures on the news test fell from 73–75% to 42–45% for B and C.
+2. **Experiment 1's fine-tuning had specialised B and C too narrowly.**
+   - Trained on SeyhaLite alone, both scored slightly *below* the untouched pretrained model on news text: 34.5 and 34.1 vs. 36.1. They had adapted to the corpus's colloquial register.
+   - With ALT added, they are 6.5 and 5.6 points *above* it. They keep their in-domain gains and also improve on standard Khmer.
+   - **B is again the best approach**, confirming the recommendation in §9.
+3. **A gained the most but is still last out of domain** (33.5, below zero-shot 36.1).
+   - Without pretraining, everything A knows about standard Khmer comes from 18k ALT pairs.
+   - B and C start from NLLB's knowledge of 200 languages.
+   - A's repetition/hallucination share on the news test fell from 15.6% to 2.9%: it now writes Khmer sentences instead of degenerate strings.
+4. **There is a small in-domain trade-off for B and C** (−0.9 and −1.6 chrF++; exact matches fell from 97.0% to 92.9% for B and from 92.5% to 85.6% for C). Two causes:
+   - Their budgets are fixed in *steps*, so ALT's share of the batches means about 17% fewer SeyhaLite pairs are seen.
+   - ALT's formal register (e.g. `ខ្ញុំ` for "I") competes with the colloquial spelling of the SeyhaLite references (`ញុម`).
+
+   A trains for a fixed number of *epochs*, so it still sees every SeyhaLite pair 15 times. With 21% more steps, it improved slightly (exact matches 95.8% → 99.3%).
+5. **A now overfits; B and C do not.**
+
+   ![Experiment 2 learning curves](results/augmented/figures/learning_curves.png)
+
+   - **A:** validation loss is lowest after epoch 4 (4.50), then rises to 4.80 by epoch 15, while training loss keeps falling (to 1.81). Validation chrF++ plateaus near 50 from epoch 5 on. Early stopping (on chrF++) selected epoch 12.
+   - **Cause:** ALT's 17,845 pairs are repeated 3× per epoch for 15 epochs, so the 11.5M-parameter model sees each one 45 times and starts to memorise them. In experiment 1, the templated corpus hid this (§7).
+   - **B and C:** validation loss falls throughout (B 1.28 → 1.07, C 1.37 → 1.10), and C's is still falling at the end.
+   - **Remedies for A:** fewer epochs, early stopping on validation loss, less upsampling, or more dropout. Dropout was tuned on SeyhaLite only.
+6. **Qualitative probe:** 14 everyday sentences, including the 5 from the qualitative check above ([`src/probe.py`](src/probe.py); [`results/augmented/qualitative_probe.md`](results/augmented/qualitative_probe.md), experiment 1 in [`results/qualitative_probe.md`](results/qualitative_probe.md)).
+   - **A** no longer produces unreadable strings:
+     - *"Where is the nearest hospital?"* → `តើមន្ទីរពេទ្យដែលនៅជិតបំផុតនៅឯណា?` is correct.
+     - The study sentence becomes `ខ្ញុំចង់រៀនសូត្រក្នុងឪពុកម្តាយរបស់ខ្ញុំ។` ("I want to study in my parents"): real Khmer, but it drops "English" and "school".
+   - **B** improves on several sentences:
+     - *"i want you to believe in me…"* → `ញុមចង់ឲ្យអ្នកជឿលើខ្ញុំ…` now has the correct "want you to".
+     - *"I am a student at Kirirom Institute of Technology."* → `ញុមជាសិស្សនៅវិទ្យាស្ថានបច្ចេកវិទ្យាគីរ៉ូម។` now says "institute" instead of "high school".
+   - **Not fixed:** "hug" and "kiss" are still mistranslated by every trained model. B gives `ញុមចង់យកចិត្តទុកដាក់ឯង` ("pay attention to you") and `ញុមចង់បានអ្នក` ("I want you"). The reason is in the data: **"hug" and "kiss" occur 0 times in SeyhaLite's 259k training pairs, and 2 times each in ALT** ("hugged", "kiss"). News text rarely contains such everyday vocabulary.
+
+**Conclusion.**
+- More data helps exactly where the new data covers the domain. ALT made every model far better on standard, formal Khmer, and B remains the best approach.
+- Everyday conversational vocabulary will need **conversational** parallel data. That is the first item of future work (§11).
+
+## 11. Limitations and future work
 
 **Limitations**
-- **In-domain, templated test data (the main limitation).** The English vocabulary is only 4.1k words, 3.1% of test references also appear verbatim in training, and 92–97% of the trained models' test outputs match the reference exactly. The scores therefore measure fit to this corpus's templates and **overestimate performance on open-domain text**. The ranking, in particular A's position relative to the NLLB-based B and C, may change outside the templates (§9). That is untested here and is the first item of future work.
+- **In-domain, templated test data (the main limitation of experiment 1).**
+  - The English vocabulary is only 4.1k words, 3.1% of test references also appear verbatim in training, and 92–97% of the trained models' test outputs match the reference exactly.
+  - The in-domain scores therefore measure fit to this corpus's templates and **overestimate performance on open-domain text**.
+  - Experiment 2 (§10) adds one out-of-domain test set, ALT news, where the best model scores 42.6 chrF++ rather than 99. That is a single domain (formal news), so conversational text outside the templates is still covered only by the 14-sentence qualitative probe.
+- **Everyday vocabulary gaps.** Common words that neither corpus contains, such as "hug" and "kiss" (§10), are mistranslated by every trained model.
 - **Automatic metrics against a single reference.** No human evaluation. Inconsistent Khmer spacing and colloquial spelling make even correct translations score imperfectly.
 - **Unequal budgets.**
   - The approaches saw very different amounts of data: A 3.88M pair-passes, B 256k, C 32k. So the ranking reflects each approach at its chosen budget, not at equal training.
@@ -348,17 +434,20 @@ B and C keep NLLB's broad multilingual knowledge. B leaves 92% of NLLB's weights
 - **Different hardware for B.** B's final run was trained on an RTX 4070 Laptop GPU because the Colab quota ran out; the others ran on a T4. Scores are unaffected, but B's timings are not directly comparable (§4).
 - **No statistics.** There is one seed per configuration, with no confidence intervals or significance tests. The top three differ by less than 1 chrF++, so their ranking in particular is not statistically established.
 - **Tuning.** B was not tuned for learning rate or dropout, only for its budget (§6). A's and C's best learning rates lie at the edge of their grids. Short trials favour fast-converging settings.
-- **Test subset.** 5,000 of the 32,355 test pairs are used, identical for all approaches, to keep beam-search evaluation within the Colab budget.
+- **Test subset.** 5,000 of the 32,355 in-domain test pairs are used, identical for all approaches, to keep beam-search evaluation within the Colab budget. All 1,018 ALT test pairs are used.
+- **Experiment 2 reused experiment 1's hyperparameters.** The ALT upsampling factor (3×) was not tuned, and A overfits the repeated ALT pairs (§10). A with tuned regularization or fewer epochs may score higher out of domain.
 - **License.** The NLLB weights are CC-BY-NC-4.0, so the fine-tuned models are for non-commercial use only.
 
 **Future work** (in priority order)
-1. Evaluate on an out-of-domain benchmark (FLORES-200 `khm_Khmr` devtest) to measure generalisation beyond the templated corpus.
-2. Parameter-efficient fine-tuning (LoRA) as a fourth approach between B and C.
-3. Multiple seeds and bootstrap confidence intervals for the metric differences.
-4. Normalise Khmer spacing and spelling in the references, and add a human evaluation of a sample.
-5. Train C for the same one-epoch budget as B, to compare full fine-tuning and the frozen backbone at equal data.
+1. Add **conversational** English–Khmer parallel data (for example, OPUS corpora such as Tatoeba) to cover everyday vocabulary that neither SeyhaLite nor ALT contains (§10).
+2. Evaluate on a second out-of-domain benchmark (FLORES-200 `khm_Khmr` devtest), which covers more topics than ALT's news.
+3. Tune experiment 2 for the mixed data: the ALT upsampling factor, and early stopping on validation loss for A.
+4. Parameter-efficient fine-tuning (LoRA) as a fourth approach between B and C.
+5. Multiple seeds and bootstrap confidence intervals for the metric differences.
+6. Normalise Khmer spacing and spelling in the references, and add a human evaluation of a sample.
+7. Train C for the same one-epoch budget as B, to compare full fine-tuning and the frozen backbone at equal data.
 
-## 11. How to reproduce
+## 12. How to reproduce
 
 ### Option 1: Google Colab (recommended; everything is stored in Google Drive)
 1. Upload `english-khmer-translation.zip` (the code) to **My Drive**.
@@ -393,16 +482,45 @@ python -m src.plots                            # all figures
 ```
 Every training command accepts `--resume` to continue after an interruption. Each script's `--help` lists its options, and each script's docstring has a quick smoke-test command.
 
-## 12. Repository structure
+### Experiment 2 (SeyhaLite + ALT)
+On Colab, open [`notebooks/colab_experiment2.ipynb`](notebooks/colab_experiment2.ipynb) and choose **Run all**. It trains and evaluates A, B and C, then writes `results_bundle_exp2.zip` to Drive.
+
+Locally, set the experiment first. It routes every output to `results/augmented/` and `models/augmented/`:
+```bash
+export EXPERIMENT=augmented                    # PowerShell: $env:EXPERIMENT = "augmented"
+python -m src.data                             # SeyhaLite + ALT x3
+python -m src.train_scratch --learning-rate 0.001 --dropout 0.1
+python -m src.train_frozen --max-steps 16000 --eval-steps 2000 --save-steps 2000
+python -m src.train_finetune --learning-rate 0.0001 --dropout 0.1
+python -m src.evaluate --approach frozen                  # repeat for scratch, full;
+python -m src.evaluate --approach frozen --test-set alt   # both test sets
+python -m src.error_analysis && python -m src.error_analysis --test-set alt
+python -m src.compare && python -m src.compare --test-set alt
+python -m src.plots
+python -m src.probe                            # everyday-sentence probe
+unset EXPERIMENT
+python -m src.compare_experiments              # experiment 1 vs. 2 table + figure
+```
+
+### Try the models
+```bash
+python -m src.translate --approach frozen,scratch "Where is the nearest hospital?"
+pip install -r demo/requirements.txt && python -m streamlit run demo/app.py   # web demo
+```
+Set `EXPERIMENT=augmented` first to use experiment 2's models.
+
+## 13. Repository structure
 
 ```
 ├── README.md                 this report
 ├── requirements.txt          pinned package versions
 ├── notebooks/
-│   └── colab_runner.ipynb    end-to-end Colab runner (Drive-backed, resumable)
+│   ├── colab_runner.ipynb    experiment 1: end-to-end Colab runner (Drive-backed, resumable)
+│   └── colab_experiment2.ipynb  experiment 2: SeyhaLite + ALT
+├── demo/                     Streamlit web demo (app.py)
 ├── src/
-│   ├── config.py             paths, languages, seed, test-set size, approach registry
-│   ├── data.py               load → clean → split → tokenize (shared by all approaches)
+│   ├── config.py             paths, languages, seed, test sets, EXPERIMENT switch, approach registry
+│   ├── data.py               load → clean → split → tokenize; ALT and the experiment-2 mix
 │   ├── data_stats.py         dataset statistics and length figure
 │   ├── model_scratch.py      A: Transformer, beam search, save/load
 │   ├── train_scratch.py      A: tokenizer + PyTorch training loop + torch.save checkpoints
@@ -413,9 +531,15 @@ Every training command accepts `--resume` to continue after an interruption. Eac
 │   ├── error_analysis.py     failure categories and examples
 │   ├── compare.py            the single results table
 │   ├── plots.py              comparison figures
+│   ├── compare_experiments.py  experiment 1 vs. 2 table and figure
+│   ├── probe.py              everyday-sentence qualitative probe
+│   ├── translate.py          translate your own sentences (CLI)
 │   ├── check_gpu.py          environment check
 │   └── utils/                metrics, seeding, Trainer pipeline, reporting, plot style
-└── results/
+└── results/                  experiment 1 (files with an _alt suffix: ALT news test set)
+    ├── augmented/            experiment 2: the same layout as below
+    ├── experiments_comparison.md  experiment 1 vs. 2
+    ├── qualitative_probe.{md,json}
     ├── comparison.{md,csv}   results table
     ├── *_results.json        test metrics per approach
     ├── *_train_summary.json  params, hyperparameters, time, hardware per approach
@@ -428,20 +552,24 @@ Every training command accepts `--resume` to continue after an interruption. Eac
     └── figures/              all figures
 ```
 
-## 13. Model weights
+## 14. Model weights
 
 | Approach | Size | Location |
 |---|---|---|
 | A: scratch | ~46 MB | [`models/scratch/`](models/scratch/) (in this repository) |
 | B: frozen backbone (16,000-step final model) | ~1.2 GB (fp16) | ⏳ *Google Drive link to `models/nllb_frozen/`* |
 | C: full fine-tuning | ~1.2 GB (fp16) | ⏳ *Google Drive link to `models/nllb_full/`* |
+| Experiment 2, A: scratch | ~46 MB | [`models/augmented/scratch/`](models/augmented/scratch/) (in this repository) |
+| Experiment 2, B: frozen backbone | ~1.2 GB (fp16) | ⏳ *Google Drive link to `models/augmented/nllb_frozen/`* |
+| Experiment 2, C: full fine-tuning | ~1.2 GB (fp16) | ⏳ *Google Drive link to `models/augmented/nllb_full/`* |
 
-To evaluate downloaded weights, place them in `models/` and run `python -m src.evaluate --approach frozen` (or `full` / `scratch`).
+To evaluate downloaded weights, place them in `models/` (experiment 2: `models/augmented/`) and run `python -m src.evaluate --approach frozen` (or `full` / `scratch`). For experiment 2, set `EXPERIMENT=augmented` first.
 
-## 14. References
+## 15. References
 
 - NLLB Team, Costa-jussà, M. R., et al. (2022). *No Language Left Behind: Scaling Human-Centered Machine Translation.* arXiv:2207.04672. Model: [`facebook/nllb-200-distilled-600M`](https://huggingface.co/facebook/nllb-200-distilled-600M), CC-BY-NC-4.0.
 - SeyhaLite (2026). *Translate-English-Khmer-All* [dataset]. Hugging Face: [`SeyhaLite/Translate-English-Khmer-All`](https://huggingface.co/datasets/SeyhaLite/Translate-English-Khmer-All), Apache-2.0.
+- Riza, H., et al. (2016). *Introduction of the Asian Language Treebank.* O-COCOSDA. Dataset: [`mutiyama/alt`](https://huggingface.co/datasets/mutiyama/alt), CC-BY-4.0 (experiment 2).
 - Vaswani, A., et al. (2017). *Attention Is All You Need.* NeurIPS.
 - Popović, M. (2015). *chrF: character n-gram F-score for automatic MT evaluation.* WMT. Popović, M. (2017). *chrF++: words helping character n-grams.* WMT.
 - Post, M. (2018). *A Call for Clarity in Reporting BLEU Scores.* WMT (sacreBLEU).
@@ -453,7 +581,7 @@ To evaluate downloaded weights, place them in `models/` and run `python -m src.e
 - Wolf, T., et al. (2020). *Transformers: State-of-the-Art Natural Language Processing.* EMNLP (Hugging Face Transformers, used for B and C).
 - Paszke, A., et al. (2019). *PyTorch: An Imperative Style, High-Performance Deep Learning Library.* NeurIPS.
 
-## 15. AI use disclosure
+## 16. AI use disclosure
 
 - **Tools used:** Claude (Anthropic), via Claude Code in VS Code.
 - **Scope of use:**
@@ -467,4 +595,10 @@ To evaluate downloaded weights, place them in `models/` and run `python -m src.e
   - **Testing and setup:** Claude ran the local smoke tests and benchmarks, and uploaded the code to Google Drive for the Colab run.
   - **README:** Claude drafted this README, including the descriptions of the results, the error analysis and the discussion, from the generated result files.
   - **Experiments:** the author ran the Colab experiments. B's final 16,000-step run was run by Claude on the author's laptop GPU, at the author's request, after the Colab GPU quota ran out. Claude then updated the results table, figures and this README.
+  - **Experiment 2:**
+    - The author wrote a qualitative evaluation report of the experiment 1 models on everyday sentences and asked for more training data.
+    - Claude proposed ALT, wrote the experiment 2 code (data mixing, the second test set, the probe, the cross-experiment comparison) and the Colab notebook, and smoke-tested the pipeline.
+    - The author ran the notebook on Colab.
+    - Claude produced the tables, figures and error analysis, the qualitative probe and §10 from the result files.
+  - **Demo:** Claude wrote the command-line translator (`src/translate.py`) and the Streamlit demo (`demo/app.py`).
 - **Verification:** ⏳ *Describe what you personally checked. For example: which files you read and can explain, that you reviewed sample translations in `results/predictions/`, and which parts of the analysis you rewrote in your own words.*

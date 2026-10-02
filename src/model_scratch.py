@@ -245,19 +245,33 @@ class ScratchTranslator:
         batch_size: int = 64,
         num_beams: int = 4,
         max_new_tokens: int = MAX_LENGTH,
+        max_batch_tokens: int = 48_000,
     ) -> list[str]:
-        """Translate English sentences, batching by length for efficiency."""
+        """Translate English sentences, batching by length for efficiency.
+
+        Sentences are sorted by length, longest first. Each batch holds at most
+        ``batch_size`` sentences and is also capped so that
+        ``num_beams x sentences x (source + output length)`` stays under
+        ``max_batch_tokens``. That keeps GPU memory bounded on long inputs, such as
+        news sentences, without slowing down short ones.
+        """
         self.model.eval()
-        order = sorted(range(len(texts)), key=lambda i: len(texts[i]), reverse=True)
+        encoded = [self.encode_source(text) for text in texts]
+        order = sorted(range(len(texts)), key=lambda i: len(encoded[i]), reverse=True)
         outputs = [""] * len(texts)
         use_amp = self.device.type == "cuda"
-        for start in range(0, len(order), batch_size):
-            indices = order[start : start + batch_size]
-            src = pad_batch([self.encode_source(texts[i]) for i in indices]).to(self.device)
+        start = 0
+        while start < len(order):
+            longest = len(encoded[order[start]])  # sorted, so the first sentence is the longest
+            tokens_per_sentence = num_beams * (longest + min(max_new_tokens, 2 * longest + 10))
+            size = max(1, min(batch_size, max_batch_tokens // tokens_per_sentence))
+            indices = order[start : start + size]
+            src = pad_batch([encoded[i] for i in indices]).to(self.device)
             with torch.autocast("cuda", dtype=torch.float16, enabled=use_amp):
                 generated = self.model.generate(src, num_beams=num_beams, max_new_tokens=max_new_tokens)
             for index, ids in zip(indices, generated[:, 1:].tolist()):
                 outputs[index] = self.decode_ids(ids)
+            start += size
         return outputs
 
     def save(self, directory: Path) -> None:

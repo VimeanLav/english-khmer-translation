@@ -11,15 +11,22 @@ with different decoding settings, because that would make the comparison unfair.
 
 Run from the project root:
 
-    python -m src.compare
+    python -m src.compare                  # in-domain test set -> comparison.md
+    python -m src.compare --test-set alt   # ALT news test set  -> comparison_alt.md
 """
 
 from __future__ import annotations
 
+import argparse
 import csv
 
-from src.config import APPROACHES, RESULTS_DIR
+from src.config import APPROACHES, RESULTS_DIR, TEST_SETS
 from src.utils.reporting import load_json
+
+TEST_SET_NAMES = {
+    "seyhalite": "in-domain SeyhaLite test sentences",
+    "alt": "out-of-domain ALT news test sentences",
+}
 
 
 def fmt_params(n: int | None) -> str:
@@ -40,13 +47,19 @@ def fmt_duration(seconds: float | None) -> str:
 
 
 def main() -> None:
-    """Assemble and save the comparison table."""
+    """Assemble and save the comparison table for one test set."""
+    parser = argparse.ArgumentParser(description="Build the results table.")
+    parser.add_argument("--test-set", choices=TEST_SETS, default="seyhalite")
+    test_set = parser.parse_args().test_set
+    suffix = "" if test_set == "seyhalite" else f"_{test_set}"
+
     rows = []
     for key, approach in APPROACHES.items():
-        if not approach.results_path.is_file():
-            print(f"Skipping {key}: {approach.results_path.name} not found.")
+        results_path = approach.results_file(test_set)
+        if not results_path.is_file():
+            print(f"Skipping {key}: {results_path.name} not found.")
             continue
-        test = load_json(approach.results_path)
+        test = load_json(results_path)
         train = load_json(approach.summary_path) if approach.summary_path.is_file() else {}
         hw = train.get("hardware", {})
         rows.append({
@@ -78,7 +91,7 @@ def main() -> None:
             "Re-run src.evaluate with the same settings for every approach."
         )
 
-    csv_path = RESULTS_DIR / "comparison.csv"
+    csv_path = RESULTS_DIR / f"comparison{suffix}.csv"
     with csv_path.open("w", encoding="utf-8", newline="") as f:
         writer = csv.DictWriter(f, fieldnames=list(rows[0]))
         writer.writeheader()
@@ -104,12 +117,12 @@ def main() -> None:
             f"| {r['gpu'] or '–'} |"
         )
     note = (
-        f"\n*Test set: the same {n_test:,} held-out sentences for every approach, beam search "
+        f"\n*Test set: the same {n_test:,} {TEST_SET_NAMES[test_set]} for every approach, beam search "
         f"with {beams} beams. BLEU uses sacrebleu's `flores200` SentencePiece tokenizer (spBLEU). "
         "Train time counts optimizer steps only (no evaluation or checkpointing). "
         "Params are trainable / total.*\n"
     )
-    md_path = RESULTS_DIR / "comparison.md"
+    md_path = RESULTS_DIR / f"comparison{suffix}.md"
     md_path.write_text(header + "\n".join(lines) + "\n" + note, encoding="utf-8")
     print(header + "\n".join(lines) + "\n" + note)
     print(f"Saved {csv_path} and {md_path}")

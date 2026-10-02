@@ -25,7 +25,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.ticker import FuncFormatter
 
-from src.config import APPROACHES, ERROR_ANALYSIS_DIR, TUNING_DIR
+from src.config import APPROACHES, ERROR_ANALYSIS_DIR, TEST_SETS, TUNING_DIR
 from src.utils.plotting import (
     APPROACH_COLORS,
     SEQUENTIAL,
@@ -37,6 +37,9 @@ from src.utils.plotting import (
 from src.utils.reporting import load_json
 
 TRAINED = [k for k, a in APPROACHES.items() if a.trained]
+# Figure-name suffix and title wording per test set.
+TEST_SET_SUFFIX = {"seyhalite": "", "alt": "_alt"}
+TEST_SET_TITLE = {"seyhalite": "in-domain test set", "alt": "ALT news test set (out-of-domain)"}
 # Compact axis labels (e.g. 50k, 1.5M) so long numbers never overlap.
 THOUSANDS = FuncFormatter(
     lambda x, _: f"{x / 1e6:g}M" if abs(x) >= 1e6 else f"{x / 1e3:g}k" if abs(x) >= 1e3 else f"{x:g}"
@@ -89,7 +92,7 @@ def plot_val_chrf(histories: dict[str, dict]) -> None:
     save_figure(fig, "val_chrf_curves")
 
 
-def plot_test_metrics(results: dict[str, dict]) -> None:
+def plot_test_metrics(results: dict[str, dict], test_set: str = "seyhalite") -> None:
     """Grouped bars: chrF++, chrF and BLEU on the test set for every approach."""
     metrics = [("chrf++", "chrF++ (primary)"), ("chrf", "chrF"), ("bleu", "BLEU (spBLEU)")]
     keys = list(results)
@@ -103,11 +106,12 @@ def plot_test_metrics(results: dict[str, dict]) -> None:
         ax.bar_label(bars, fmt="%.1f", padding=2, fontsize=8, color=TEXT)
     ax.set_xticks(x, [label for _, label in metrics])
     ax.set_ylabel("Score (0–100)")
-    ax.set_title(f"Test-set scores ({next(iter(results.values()))['num_samples']:,} sentences)")
+    ax.set_title(f"Scores on the {TEST_SET_TITLE[test_set]} "
+                 f"({next(iter(results.values()))['num_samples']:,} sentences)")
     # Legend below the axes so it never covers a bar or its value label.
     fig.legend(*ax.get_legend_handles_labels(), loc="outside lower center", ncols=2, fontsize=9)
     ax.set_ylim(0, max(max(r[m] for m, _ in metrics) for r in results.values()) * 1.12)
-    save_figure(fig, "test_metrics")
+    save_figure(fig, f"test_metrics{TEST_SET_SUFFIX[test_set]}")
 
 
 def plot_efficiency(results: dict[str, dict]) -> None:
@@ -180,11 +184,13 @@ def plot_tuning() -> None:
         save_figure(fig, f"tuning_{key}")
 
 
-def plot_error_analysis() -> None:
+def plot_error_analysis(test_set: str = "seyhalite") -> None:
     """Error-category shares and chrF++ by sentence length, from src.error_analysis."""
-    path = ERROR_ANALYSIS_DIR / "summary.json"
+    folder = ERROR_ANALYSIS_DIR if test_set == "seyhalite" else ERROR_ANALYSIS_DIR / test_set
+    path = folder / "summary.json"
     if not path.is_file():
         return
+    suffix = TEST_SET_SUFFIX[test_set]
     summary = load_json(path)["approaches"]
     keys = list(summary)
     categories = [c for c in next(iter(summary.values()))["categories_pct"]
@@ -206,9 +212,9 @@ def plot_error_analysis() -> None:
     ax.grid(axis="x")
     ax.grid(axis="y", visible=False)
     ax.set_xlabel("Share of test sentences (%)")
-    ax.set_title("Translation outcome categories")
+    ax.set_title(f"Translation outcome categories: {TEST_SET_TITLE[test_set]}")
     ax.legend(fontsize=8.5, loc="lower right")
-    save_figure(fig, "error_categories")
+    save_figure(fig, f"error_categories{suffix}")
 
     fig, ax = plt.subplots(figsize=(8, 4), layout="constrained")
     for key in keys:
@@ -218,9 +224,9 @@ def plot_error_analysis() -> None:
         ax.plot(labels, values, marker="o", color=APPROACH_COLORS[key], label=summary[key]["label"])
     ax.set_xlabel("English source length (words)")
     ax.set_ylabel("Mean sentence chrF++")
-    ax.set_title("Quality by sentence length (test set)")
+    ax.set_title(f"Quality by sentence length: {TEST_SET_TITLE[test_set]}")
     ax.legend(fontsize=9)
-    save_figure(fig, "chrf_by_length")
+    save_figure(fig, f"chrf_by_length{suffix}")
 
 
 def main() -> None:
@@ -230,12 +236,17 @@ def main() -> None:
     if histories:
         plot_learning_curves(histories)
         plot_val_chrf(histories)
-    results = {k: load_json(a.results_path) for k, a in APPROACHES.items() if a.results_path.is_file()}
-    if results:
-        plot_test_metrics(results)
-        plot_efficiency(results)
+    for test_set in TEST_SETS:
+        results = {
+            k: load_json(a.results_file(test_set))
+            for k, a in APPROACHES.items() if a.results_file(test_set).is_file()
+        }
+        if results:
+            plot_test_metrics(results, test_set)
+            if test_set == "seyhalite":
+                plot_efficiency(results)
+        plot_error_analysis(test_set)
     plot_tuning()
-    plot_error_analysis()
 
 
 if __name__ == "__main__":

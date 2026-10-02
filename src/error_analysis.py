@@ -30,11 +30,13 @@ points to noisy references.
 
 Run from the project root (after evaluating the approaches):
 
-    python -m src.error_analysis
+    python -m src.error_analysis                   # in-domain test set
+    python -m src.error_analysis --test-set alt    # out-of-domain ALT news test set
 """
 
 from __future__ import annotations
 
+import argparse
 import json
 import re
 from collections import Counter
@@ -42,7 +44,7 @@ from pathlib import Path
 
 import numpy as np
 
-from src.config import APPROACHES, ERROR_ANALYSIS_DIR, SRC_COLUMN
+from src.config import APPROACHES, ERROR_ANALYSIS_DIR, SRC_COLUMN, TEST_SETS
 from src.data import load_tokenized_datasets
 from src.utils.metrics import sentence_chrf_pp
 from src.utils.reporting import save_json
@@ -129,8 +131,13 @@ def format_example(row: dict) -> str:
     )
 
 
-def analyse_approach(key: str, rows: list[dict], train_vocab: set[str]) -> dict:
-    """Score, categorise and summarise one approach; write its examples file."""
+def analysis_dir(test_set: str) -> Path:
+    """Output folder: ``error_analysis/`` for the in-domain test set, a subfolder otherwise."""
+    return ERROR_ANALYSIS_DIR if test_set == "seyhalite" else ERROR_ANALYSIS_DIR / test_set
+
+
+def analyse_approach(key: str, rows: list[dict], train_vocab: set[str], out_dir: Path) -> dict:
+    """Score, categorise and summarise one approach; write its examples file to ``out_dir``."""
     for row in rows:
         row["chrf"] = sentence_chrf_pp(row["hyp"], row["ref"])
         row["category"] = categorise(row["src"], row["ref"], row["hyp"], row["chrf"], train_vocab)
@@ -156,7 +163,7 @@ def analyse_approach(key: str, rows: list[dict], train_vocab: set[str]) -> dict:
         if examples:
             lines.append(f"\n## {category} ({counts[category]} sentences)\n")
             lines += [format_example(r) for r in examples]
-    path = ERROR_ANALYSIS_DIR / f"{key}_examples.md"
+    path = out_dir / f"{key}_examples.md"
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text("\n".join(lines), encoding="utf-8")
     print(f"Saved {path}")
@@ -173,24 +180,42 @@ def analyse_approach(key: str, rows: list[dict], train_vocab: set[str]) -> dict:
     }
 
 
+def parse_args() -> argparse.Namespace:
+    """Parse command-line arguments."""
+    parser = argparse.ArgumentParser(description="Error analysis of test-set translations.")
+    parser.add_argument(
+        "--test-set", choices=TEST_SETS, default="seyhalite",
+        help="Which test set's predictions to analyse.",
+    )
+    return parser.parse_args()
+
+
 def main() -> None:
-    """Analyse every approach that has a predictions file."""
+    """Analyse every approach that has a predictions file for the chosen test set."""
+    test_set = parse_args().test_set
+    out_dir = analysis_dir(test_set)
+    out_dir.mkdir(parents=True, exist_ok=True)
     train = load_tokenized_datasets()["train"]
     train_vocab = {w for t in train[SRC_COLUMN] for w in WORD_RE.findall(t.lower())}
 
     all_rows: dict[str, list[dict]] = {}
     for key, approach in APPROACHES.items():
-        if approach.predictions_path.is_file():
-            all_rows[key] = load_predictions(approach.predictions_path)
+        if approach.predictions_file(test_set).is_file():
+            all_rows[key] = load_predictions(approach.predictions_file(test_set))
     if not all_rows:
-        raise SystemExit("No predictions found. Run `python -m src.evaluate --approach ...` first.")
+        raise SystemExit(
+            f"No {test_set} predictions found. Run `python -m src.evaluate --test-set {test_set}` first."
+        )
     sizes = {len(rows) for rows in all_rows.values()}
     if len(sizes) > 1:
         raise SystemExit(f"Approaches were evaluated on different test sizes {sizes}; re-run evaluation.")
 
     summary = {
+        "test_set": test_set,
         "fail_threshold_chrf++": FAIL_THRESHOLD,
-        "approaches": {key: analyse_approach(key, rows, train_vocab) for key, rows in all_rows.items()},
+        "approaches": {
+            key: analyse_approach(key, rows, train_vocab, out_dir) for key, rows in all_rows.items()
+        },
     }
 
     # Sentences that every *trained* approach fails: often noisy references.
@@ -209,10 +234,10 @@ def main() -> None:
             lines.append(f"- EN: {first['src']}\n  - REF: {first['ref']}")
             for k in trained:
                 lines.append(f"  - {APPROACHES[k].label}: {all_rows[k][i]['hyp'] or '∅'}")
-        (ERROR_ANALYSIS_DIR / "hard_for_all.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
+        (out_dir / "hard_for_all.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
 
-    save_json(summary, ERROR_ANALYSIS_DIR / "summary.json")
-    print(f"Saved {ERROR_ANALYSIS_DIR / 'summary.json'}")
+    save_json(summary, out_dir / "summary.json")
+    print(f"Saved {out_dir / 'summary.json'}")
     for key, s in summary["approaches"].items():
         print(f"{s['label']:<38} failures {s['failure_rate_pct']:>6.2f}%  "
               f"exact {s['categories_pct']['exact_match']:>6.2f}%  "

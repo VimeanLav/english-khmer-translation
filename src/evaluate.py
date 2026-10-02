@@ -13,6 +13,9 @@ Run from the project root. Use ``-m`` so this file does not hide the
     python -m src.evaluate --approach scratch    # A
     python -m src.evaluate --approach frozen     # B
     python -m src.evaluate --approach full       # C
+    python -m src.evaluate --approach frozen --test-set alt   # out-of-domain ALT news test set
+
+Set the EXPERIMENT environment variable to "augmented" to evaluate experiment 2's models.
 """
 
 from __future__ import annotations
@@ -29,16 +32,18 @@ from transformers import AutoModelForSeq2SeqLM, PreTrainedModel, PreTrainedToken
 from src.config import (
     APPROACHES,
     EVAL_NUM_BEAMS,
+    EXPERIMENT,
     MAX_LENGTH,
     PROJECT_ROOT,
     SEED,
     SRC_COLUMN,
     SRC_LANG,
     TEST_EVAL_SIZE,
+    TEST_SETS,
     TGT_COLUMN,
     TGT_LANG,
 )
-from src.data import get_tokenizer, load_tokenized_datasets
+from src.data import get_tokenizer, load_alt_datasets, load_tokenized_datasets
 from src.model_scratch import ScratchTranslator
 from src.utils.metrics import compute_translation_metrics
 from src.utils.reporting import save_json, utc_timestamp
@@ -174,8 +179,9 @@ def evaluate_model(
     num_beams: int = EVAL_NUM_BEAMS,
     max_samples: int | None = TEST_EVAL_SIZE,
     from_predictions: Path | None = None,
+    test_set: str = "seyhalite",
 ) -> dict:
-    """Translate the test subset, score it, and save metrics and predictions.
+    """Translate a test set, score it, and save metrics and predictions.
 
     Args:
         approach_key: Name recorded in the results file.
@@ -187,15 +193,18 @@ def evaluate_model(
         max_samples: Number of test sentences (``None`` = the whole test split).
         from_predictions: Re-score translations saved by an earlier run instead
             of translating again (verified against the test set first).
+        test_set: ``seyhalite`` (in-domain; first ``max_samples`` test pairs) or
+            ``alt`` (out-of-domain news; ALT's 1,018 test pairs).
 
     Returns:
         The metrics dictionary that was saved.
     """
     set_seed(SEED)
     model_path = resolve_model_path(model_path)
-    print(f"Evaluating {approach_key}: {model_path}")
+    print(f"Evaluating {approach_key} on the {test_set} test set: {model_path}")
 
-    test = load_tokenized_datasets()["test"]
+    # ALT's test split (1,018 pairs) is smaller than TEST_EVAL_SIZE, so by default all of it is used.
+    test = load_alt_datasets()["test"] if test_set == "alt" else load_tokenized_datasets()["test"]
     if max_samples is not None and max_samples < len(test):
         test = test.select(range(max_samples))
     sources, references = list(test[SRC_COLUMN]), list(test[TGT_COLUMN])
@@ -211,6 +220,8 @@ def evaluate_model(
 
     results = {
         "approach": approach_key,
+        "experiment": EXPERIMENT,
+        "test_set": test_set,
         "model": model_path,
         "source_lang": SRC_LANG,
         "target_lang": TGT_LANG,
@@ -243,6 +254,10 @@ def parse_args() -> argparse.Namespace:
         help="Test sentences to use; -1 = the whole test split.",
     )
     parser.add_argument(
+        "--test-set", choices=TEST_SETS, default="seyhalite",
+        help="seyhalite = in-domain test sentences; alt = out-of-domain news (ALT).",
+    )
+    parser.add_argument(
         "--from-predictions", type=Path, default=None,
         help="Re-score a predictions JSONL from an earlier run instead of translating again "
         "(must match the test set exactly, and must use the same --num-beams).",
@@ -254,11 +269,11 @@ def main() -> None:
     """Evaluate one approach and print its scores."""
     args = parse_args()
     approach = APPROACHES[args.approach]
-    output = args.output or approach.results_path
+    output = args.output or approach.results_file(args.test_set)
     if not output.is_absolute():
         output = PROJECT_ROOT / output
     predictions = (
-        approach.predictions_path if args.output is None
+        approach.predictions_file(args.test_set) if args.output is None
         else output.with_name(f"{output.stem}_predictions.jsonl")
     )
     results = evaluate_model(
@@ -270,6 +285,7 @@ def main() -> None:
         num_beams=args.num_beams,
         max_samples=None if args.max_samples == -1 else args.max_samples,
         from_predictions=args.from_predictions,
+        test_set=args.test_set,
     )
     print(f"chrF++ : {results['chrf++']:.2f}")
     print(f"chrF   : {results['chrf']:.2f}")

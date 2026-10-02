@@ -1,0 +1,5 @@
+approach,test_chrf++,test_chrf,test_bleu,trainable_params,total_params,train_steps,examples_seen,train_time_s,wall_time_s,seconds_per_step,peak_vram_gb,gpu,best_val_chrf++,test_sentences,num_beams,inference_s
+Zero-shot NLLB-600M (reference),36.0636,45.4605,8.8775,0,,,,,,,,,,1018,4,
+A: Transformer from scratch,33.4608,42.0206,21.2427,11469824,11469824,36615,4686720,4292.8,4530.0,0.1172,4.53,Tesla T4,50.3345,1018,4,20.68
+B: NLLB frozen backbone,42.5571,52.6675,32.3845,50405376,615073792,16000,256000,4190.5,5901.9,0.2619,7.13,Tesla T4,56.7752,1018,4,118.24
+C: NLLB full fine-tuning,41.6084,51.4591,31.1265,615073792,615073792,2000,32000,1819.2,3300.3,0.9096,8.15,Tesla T4,55.362,1018,4,128.07

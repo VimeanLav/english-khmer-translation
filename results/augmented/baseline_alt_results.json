@@ -1,0 +1,18 @@
+{
+  "approach": "baseline",
+  "experiment": "augmented",
+  "test_set": "alt",
+  "model": "facebook/nllb-200-distilled-600M",
+  "source_lang": "eng_Latn",
+  "target_lang": "khm_Khmr",
+  "split": "test",
+  "num_samples": 1018,
+  "num_beams": 4,
+  "chrf++": 36.0636,
+  "chrf": 45.4605,
+  "bleu": 8.8775,
+  "bleu_tokenizer": "flores200",
+  "inference_seconds": null,
+  "rescored_from": "baseline_alt.jsonl",
+  "timestamp": "2026-09-30T08:18:39+00:00"
+}

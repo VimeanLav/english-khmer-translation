@@ -1,0 +1,4 @@
+# Extra dependency for the web demo (on top of the main requirements.txt):
+#   pip install -r demo/requirements.txt
+#   python -m streamlit run demo/app.py
+streamlit==1.57.0

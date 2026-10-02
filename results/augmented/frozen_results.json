@@ -1,0 +1,18 @@
+{
+  "approach": "frozen",
+  "experiment": "augmented",
+  "test_set": "seyhalite",
+  "model": "/content/drive/MyDrive/english-khmer-translation/models/augmented/nllb_frozen",
+  "source_lang": "eng_Latn",
+  "target_lang": "khm_Khmr",
+  "split": "test",
+  "num_samples": 5000,
+  "num_beams": 4,
+  "chrf++": 98.4079,
+  "chrf": 98.723,
+  "bleu": 98.2535,
+  "bleu_tokenizer": "flores200",
+  "inference_seconds": 142.86,
+  "rescored_from": null,
+  "timestamp": "2026-09-30T06:46:10+00:00"
+}

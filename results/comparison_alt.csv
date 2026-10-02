@@ -1,0 +1,5 @@
+approach,test_chrf++,test_chrf,test_bleu,trainable_params,total_params,train_steps,examples_seen,train_time_s,wall_time_s,seconds_per_step,peak_vram_gb,gpu,best_val_chrf++,test_sentences,num_beams,inference_s
+Zero-shot NLLB-600M (reference),36.0636,45.4605,8.8775,0,,,,,,,,,,1018,4,145.36
+A: Transformer from scratch,3.815,5.0866,0.1736,11469824,11469824,30345,3884160,1305.0,1434.9,0.043,1.63,Tesla T4,99.1884,1018,4,52.73
+B: NLLB frozen backbone,34.4885,44.238,21.1832,50405376,615073792,16000,256000,3693.8,4497.9,0.2309,5.18,NVIDIA GeForce RTX 4070 Laptop GPU,99.4777,1018,4,102.68
+C: NLLB full fine-tuning,34.1001,43.7885,19.6971,615073792,615073792,2000,32000,1652.5,2260.3,0.8263,6.66,Tesla T4,98.2853,1018,4,117.81

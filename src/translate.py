@@ -45,7 +45,7 @@ def load_translator(approach_key: str, num_beams: int) -> Callable[[list[str]], 
     if approach.trained and not Path(model_path).is_dir():
         raise SystemExit(
             f"No model for '{approach_key}' at {model_path}. Train it first, or download it "
-            "into models/ (see README §13)."
+            "into models/ (see the README section \"Model weights\")."
         )
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     if ScratchTranslator.is_scratch_dir(model_path):

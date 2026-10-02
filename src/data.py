@@ -6,8 +6,12 @@ NLLB tokenizer and saves the result to ``data/processed/``.
 
 Run from the project root:
 
-    python -m src.data                       # full dataset
+    python -m src.data --dynamic-padding     # experiment 1: SeyhaLite
     python -m src.data --max-samples 20000   # small subset for quick experiments
+
+Experiment 2 (SeyhaLite + ALT) is built by setting the EXPERIMENT environment
+variable (PowerShell: ``$env:EXPERIMENT = "augmented"``; bash: ``EXPERIMENT=augmented``)
+before running ``python -m src.data``. It reuses experiment 1's split unchanged.
 """
 
 from __future__ import annotations
@@ -15,11 +19,17 @@ from __future__ import annotations
 import argparse
 from pathlib import Path
 
-from datasets import Dataset, DatasetDict, load_dataset, load_from_disk
+from datasets import Dataset, DatasetDict, concatenate_datasets, load_dataset, load_from_disk
 from transformers import AutoTokenizer, PreTrainedTokenizerBase
 
 from src.config import (
+    ALT_CONFIG,
+    ALT_DATASET,
+    ALT_DIR,
+    ALT_UPSAMPLE,
+    BASE_TOKENIZED_DIR,
     DATASET_NAME,
+    EXPERIMENT,
     LABEL_PAD_ID,
     MAX_LENGTH,
     MODEL_NAME,
@@ -30,6 +40,7 @@ from src.config import (
     TGT_COLUMN,
     TGT_LANG,
     TOKENIZED_DIR,
+    VAL_EVAL_SIZE,
 )
 from src.utils.seed import set_seed
 
@@ -201,6 +212,98 @@ def prepare_datasets(
     return tokenized
 
 
+def load_alt_pairs(split: str) -> Dataset:
+    """Load one split of ALT as English/Khmer pairs, cleaned like the main corpus.
+
+    Args:
+        split: ``train``, ``validation`` or ``test``.
+
+    Returns:
+        A ``Dataset`` with ``SRC_COLUMN`` / ``TGT_COLUMN`` text columns. Pairs with
+        a missing side are dropped.
+    """
+    raw = load_dataset(ALT_DATASET, ALT_CONFIG, split=split, cache_dir=str(RAW_DIR))
+    pairs = [((t.get("en") or "").strip(), (t.get("khm") or "").strip()) for t in raw["translation"]]
+    pairs = [(en, km) for en, km in pairs if en and km]
+    dataset = Dataset.from_dict({SRC_COLUMN: [en for en, _ in pairs], TGT_COLUMN: [km for _, km in pairs]})
+    return clean_dataset(dataset)
+
+
+def prepare_alt(output_dir: Path = ALT_DIR) -> DatasetDict:
+    """Tokenize ALT's train, validation and test splits and save them.
+
+    ALT's news sentences are about 3x longer than SeyhaLite's. The ~1% of
+    *training* pairs longer than ``MAX_LENGTH`` tokens on either side are dropped
+    rather than truncated, so the model never learns from cut-off translations.
+    Validation and test keep every pair, as every approach sees the same data.
+
+    Args:
+        output_dir: Where to save the tokenized ALT splits.
+
+    Returns:
+        The tokenized ALT ``DatasetDict``.
+    """
+    tokenizer = get_tokenizer()
+    splits = DatasetDict({split: load_alt_pairs(split) for split in ("train", "validation", "test")})
+
+    def fits(batch: dict[str, list[str]]) -> list[bool]:
+        encoded = tokenizer(batch[SRC_COLUMN], text_target=batch[TGT_COLUMN])
+        return [
+            len(src) <= MAX_LENGTH and len(tgt) <= MAX_LENGTH
+            for src, tgt in zip(encoded["input_ids"], encoded["labels"])
+        ]
+
+    splits["train"] = splits["train"].filter(fits, batched=True, desc="Dropping over-long pairs")
+    tokenized = tokenize_splits(splits, tokenizer, padding=False)
+    save_tokenized_datasets(tokenized, output_dir)
+    return tokenized
+
+
+def load_alt_datasets(input_dir: Path = ALT_DIR) -> DatasetDict:
+    """Load the tokenized ALT splits, building them first if necessary."""
+    if not input_dir.exists():
+        print(f"No processed ALT data at {input_dir}; preparing it now...")
+        return prepare_alt(input_dir)
+    return load_from_disk(str(input_dir))
+
+
+def prepare_augmented(
+    output_dir: Path = TOKENIZED_DIR, upsample: int = ALT_UPSAMPLE, seed: int = SEED
+) -> DatasetDict:
+    """Build experiment 2's data: SeyhaLite plus ALT.
+
+    - **train:** SeyhaLite's training split plus ALT's training split repeated
+      ``upsample`` times, shuffled.
+    - **validation:** the first ``VAL_EVAL_SIZE`` SeyhaLite validation pairs
+      plus ALT's validation split, shuffled. Model selection therefore rewards
+      both conversational and news-style Khmer.
+    - **test:** SeyhaLite's test split, unchanged. It is the same sentences as in
+      experiment 1, so both experiments are scored on identical data.
+
+    Args:
+        output_dir: Where to save the combined splits.
+        upsample: How many times ALT's training pairs are repeated.
+        seed: Random seed for shuffling.
+
+    Returns:
+        The combined tokenized ``DatasetDict``.
+    """
+    base = load_tokenized_datasets(BASE_TOKENIZED_DIR)
+    alt = load_alt_datasets()
+    features = base["train"].features
+    alt = DatasetDict({split: data.cast(features) for split, data in alt.items()})
+
+    combined = DatasetDict(
+        train=concatenate_datasets([base["train"]] + [alt["train"]] * upsample).shuffle(seed=seed),
+        validation=concatenate_datasets(
+            [base["validation"].select(range(VAL_EVAL_SIZE)), alt["validation"]]
+        ).shuffle(seed=seed),
+        test=base["test"],
+    )
+    save_tokenized_datasets(combined, output_dir)
+    return combined
+
+
 def load_tokenized_datasets(
     input_dir: Path = TOKENIZED_DIR, auto_prepare: bool = True
 ) -> DatasetDict:
@@ -208,8 +311,8 @@ def load_tokenized_datasets(
 
     Args:
         input_dir: Directory written by :func:`save_tokenized_datasets`.
-        auto_prepare: Run :func:`prepare_datasets` with default settings when
-            ``input_dir`` does not exist yet.
+        auto_prepare: Build the data (with dynamic padding) when ``input_dir``
+            does not exist yet.
 
     Returns:
         The tokenized ``DatasetDict``.
@@ -223,7 +326,9 @@ def load_tokenized_datasets(
                 f"No processed data at {input_dir}. Run `python -m src.data` first."
             )
         print(f"No processed data at {input_dir}; preparing it now...")
-        return prepare_datasets(output_dir=input_dir)
+        if input_dir == TOKENIZED_DIR and EXPERIMENT == "augmented":
+            return prepare_augmented(output_dir=input_dir)
+        return prepare_datasets(output_dir=input_dir, padding=False)
     return load_from_disk(str(input_dir))
 
 
@@ -240,20 +345,27 @@ def parse_args() -> argparse.Namespace:
         "(much faster for short sentences than padding to 128).",
     )
     parser.add_argument("--seed", type=int, default=SEED)
+    parser.add_argument(
+        "--alt-upsample", type=int, default=ALT_UPSAMPLE,
+        help="Experiment 2 only: how many times ALT's training pairs are repeated.",
+    )
     return parser.parse_args()
 
 
 def main() -> None:
-    """Prepare and save the tokenized English-Khmer datasets."""
+    """Prepare and save the tokenized datasets for the current EXPERIMENT."""
     args = parse_args()
     set_seed(args.seed)
-    tokenized = prepare_datasets(
-        dataset_name=args.dataset,
-        max_samples=args.max_samples,
-        output_dir=args.output_dir,
-        padding=False if args.dynamic_padding else "max_length",
-        seed=args.seed,
-    )
+    if EXPERIMENT == "augmented":
+        tokenized = prepare_augmented(args.output_dir, upsample=args.alt_upsample, seed=args.seed)
+    else:
+        tokenized = prepare_datasets(
+            dataset_name=args.dataset,
+            max_samples=args.max_samples,
+            output_dir=args.output_dir,
+            padding=False if args.dynamic_padding else "max_length",
+            seed=args.seed,
+        )
     for split, dataset in tokenized.items():
         print(f"{split:>10}: {len(dataset):,} examples")
     print(f"Saved tokenized datasets to {args.output_dir}")

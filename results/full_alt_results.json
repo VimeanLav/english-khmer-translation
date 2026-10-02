@@ -1,0 +1,18 @@
+{
+  "approach": "full",
+  "experiment": "base",
+  "test_set": "alt",
+  "model": "/content/drive/MyDrive/english-khmer-translation/models/nllb_full",
+  "source_lang": "eng_Latn",
+  "target_lang": "khm_Khmr",
+  "split": "test",
+  "num_samples": 1018,
+  "num_beams": 4,
+  "chrf++": 34.1001,
+  "chrf": 43.7885,
+  "bleu": 19.6971,
+  "bleu_tokenizer": "flores200",
+  "inference_seconds": 117.81,
+  "rescored_from": null,
+  "timestamp": "2026-09-29T11:38:28+00:00"
+}

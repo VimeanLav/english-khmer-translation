@@ -1,0 +1,154 @@
+# Sentences failed by every trained approach (685 of 1018)
+
+Manually check these for noisy or misaligned references.
+
+- EN: It has been confirmed that eight thoroughbred race horses at Randwick Racecourse in Sydney have been infected with equine influenza.
+  - REF: គេបានបញ្ចាក់ថាសេះពូជប្រណាំងទាំង៨នៅទីលានប្រណាំងសេះរង់វីក ​ទីក្រុងស៊ីដនីបានឆ្លងរោគផ្ដាសាយធំរបស់សត្វសេះ។
+  - A: Transformer from scratch: វាមានសារៈសំខាន់ដែល បានបញ្ជាក់ គំនិតផ្តួចផ្តើមបង្កើតការងារ្ចេញ្ញ្ញ្ញ្ញ្ញ្ញ្ចី។
+  - B: NLLB frozen backbone: ត្រូវបានបញ្ជាក់ថាសេះរត់ពូជស្រស់ប្រាំបីនៅរោងចក្ររត់រណបនៅសៀមរាប ត្រូវបានឆ្លងមេរោគជាមួយផ្តាសាយធំនៃសេះ។
+  - C: NLLB full fine-tuning: ត្រូវបានបញ្ជាក់ថាសេះប្រណាំងពូជផ្ទៃក្នុងប្រាំបីនៅទីតាំងរណសិរ្សរណបនៅស៊ីដនី ត្រូវបានឆ្លងមេរោគផ្តាសាយស្វា។
+- EN: Randwick has been locked down, and is expected to remain so for up to two months.
+  - REF: រង់វីកត្រូវបិទ ហើយយ៉ាងហោចណាស់ក៏ត្រូវរក្សារហូត២ខែដែរ។
+  - A: Transformer from scratch: ការសនុំខសនានាំខ្នាំខ្គី។
+  - B: NLLB frozen backbone: រង់វីកត្រូវបានសោនៅខាងក្រៅ, និងត្រូវបានរំពឹងថានឹងស្នាក់នៅដូច្នេះរហូតដល់ពីរខែ។
+  - C: NLLB full fine-tuning: រ៉ង់ដាវីក ត្រូវបានដាក់សោ, ហើយត្រូវបានរំពឹងថានឹងស្នាក់នៅយ៉ាងនោះ រហូតដល់ពីរខែ។
+- EN: It is expected that the virulent flu will affect the majority of the 700 horses stabled at Randwick.
+  - REF: គេប៉ាន់ស្មានថានឹងមានឥទិ្ធពលរីករាលដាលភាគច្រើនដល់សេះចំនួន700ក្បាលដែលស្ថិតនៅរង់វីក។
+  - A: Transformer from scratch: វាមានសារៈសំខាន់ដែលាន្ញ្ធាញ្ញ្ធានី។
+  - B: NLLB frozen backbone: វាត្រូវបានរំពឹងថាការផ្តាសាយធំនឹងប៉ះពាល់ភាគច្រើននៃសេះ៧០ ដែលត្រូវបានសាងសង់នៅរណប។
+  - C: NLLB full fine-tuning: ត្រូវបានរំពឹងថាការផ្តាសាយធំៗ នឹងប៉ះពាល់ភាគច្រើននៃសេះ ៧០០ ដែលស្ថិតនៅរង្វង់មូល។
+- EN: NSW Minister for Primary Industries said the facility would be quarantined until 30 days after the last sign of the flu.
+  - REF: រដ្ឋមន្ត្រីញូវសោវែលទទួលបន្ទុកស្សាហកម្មចម្បងៗបានមានប្រសាសន៍ថាទីកន្លែងនេះនឹងត្រូវធ្វើចត្តាលីស័ករហូត30ថ្ងៃក្រោយពីសញ្ញាចុងក្រោយនៃជម្ងឺគ្រុនផ្ដាសាយធំ។
+  - A: Transformer from scratch: ការបណ្តិតិត្ត្តិតិតិតិច្តិ។
+  - B: NLLB frozen backbone: រដ្ឋមន្ត្រីក្រសួងឧស្សាហកម្មបុគ្គលិក បាននិយាយថា រោងចក្រ នឹងត្រូវបានដាក់កុងត្រារហូតដល់ ៣០ ថ្ងៃបន្ទាប់ពីមានសញ្ញានៃផ្តាសាយធំចុងក្រោយ។
+  - C: NLLB full fine-tuning: រដ្ឋមន្ត្រីក្រសួងឧស្សាហកម្មអប្បបរមានៃខេត្តព្រះសីហនុបាននិយាយថា អចលនទ្រព្យ នឹងស្ថិតនៅក្នុងការសម្របសម្រួល រហូតដល់រយៈពេល ៣០ ថ្ងៃបន្ទាប់ពីការបង្ហាញចុងក្រោយនៃផ្តាសាយធំ។
+- EN: The cases are the first infections of race horses, despite infecting dozens of recreational horses across NSW and Queensland.
+  - REF: ករណីនេះគឺជាការឆ្លងកាត់លើកទី១សំរាប់សត្វសេះប្រណាំង ទោះបីឆ្លងលើសេះសម្រាប់កំសាន្តរាប់សិបក្បាលនៅអិនអេសដាប់ប័រយូនិងឃ្ខីនសាឡេនក៏ដោយ។
+  - A: Transformer from scratch: អ្នកសង្ានានានាញ្ញានានានាត់បាន។
+  - B: NLLB frozen backbone: ករណីនេះគឺជាការឆ្លងមេរោគដំបូងនៃសេះរត់, ទោះបីជាឆ្លងមេរោគ រាប់សិបនៃសេះសំរាប់សម្រាក នៅទូទាំងខេត្តសៀមរាប និងខេត្តគីនសែល។
+  - C: NLLB full fine-tuning: ករណីនេះគឺការឆ្លងមេរោគទីមួយនៃសេះរត់, ទោះបីជាឆ្លងមេរោគ រាប់សិបសេះសំណាញ់នៅទូទាំងខេត្តណេស៊ុយលង់ដានិងគិលានដា។
+- EN: The flu is highly contagious but cannot be transmitted to humans.
+  - REF: មេរោគនេះងាយឆ្លង​តែមិនឆ្លងដល់មនុស្សឡើយ។
+  - A: Transformer from scratch: ផ្តាសាយធំការប៉ុសនាញ្ញ្តិសនាកនេះ។
+  - B: NLLB frozen backbone: ផ្តាសាយធំគឺឆ្លងខ្លាំង ប៉ុន្តែមិនអាចឆ្លងទៅមនុស្សទេ។
+  - C: NLLB full fine-tuning: ផ្តាសាយធំគឺឆ្លងរាលដាលខ្លាំងណាស់ ប៉ុន្តែមិនអាចឆ្លងទៅមនុស្សបានទេ។
+- EN: The national racing shutdown was costing the industry tens of millions of dollars every day.
+  - REF: ការបិទការប្រណាំងថ្នាក់ជាតិ បានធ្វើឲ្យវិស័យនេះខាតបង់រាប់លានដុល្លាក្នុងមួយថ្ងៃៗ។
+  - A: Transformer from scratch: រដ្ឋសភាវិញុសនានុំនុម។
+  - B: NLLB frozen backbone: ការបិទខ្ទប់រត់ជាតិ បានចំណាយដល់ វិស័យ រាប់រយលានដុល្លារ រៀងរាល់ថ្ងៃ។
+  - C: NLLB full fine-tuning: ការបិទម៉ាស៊ីនរត់ជាតិ កំពុងតែចំណាយ ឧស្សាហកម្ម រាប់សិបលានដុល្លារ រៀងរាល់ថ្ងៃ។
+- EN: Chief Executive of Racing NSW, Peter V'Landys said while racing had been disrupted since a ban on horse movements last weekend today was a "grim, black day" for the racing industry in NSW.
+  - REF: ប្រធានទីលានប្រណាំងញូវសោវែលប៊ីតទ័រ វ៉ាឡង់ឌីលើកឡើងថាការប្រកួត ត្រូវផ្អាក់តាំងពីការហាមនូវការចរាចររបស់សត្វសេះនៅចុងសប្តាហ៍មុនគឺជា"ធ្ងន់ធ្ងរ ថ្ងៃខ្មៅ"សំរាប់វិស័យឧស្សាហកម្មប្រណាំងនៅញូវសោវែល។
+  - A: Transformer from scratch: េចេញុមទាញ្លាលាលាយ។
+  - B: NLLB frozen backbone: នាយកប្រតិបត្តិនៃរថយន្ដក្រុងព្រះសីហនុ លោក Peter V'Landys បាននិយាយថា ក្នុងអំឡុងពេលរថយន្ដ ត្រូវបានរំខាន តាំងពីការហាមឃាត់ការរត់សេះចុងសប្តាហ៍មុន ថ្ងៃនេះគឺជា"ថ្ងៃក្រៀមក្រំ ពណ៌ខ្មៅ"សម្រាប់ឧស្សាហកម្មរថយន្ដនៅក្រុងព្រះសីហនុ។
+  - C: NLLB full fine-tuning: នាយកប្រតិបត្តិនៃរថយន្ដខេត្តព្រះសីហនុ, ផេត្រ វាល្ល័ង្ក បាននិយាយថា ក្នុងអំឡុងពេលរថយន្ដ ត្រូវបានរំខាន តាំងពីការហាមឃាត់ការផ្លាស់ទីសេះចុងសប្តាហ៍មុន ថ្ងៃនេះគឺជាថ្ងៃ ដ៏ ក្រៀមក្រំ និងខ្មៅ សម្រាប់វិស័យរថយន្ដនៅខេត្តព្រះសីហនុ។
+- EN: Racing is expected to resume in all Australian states except NSW and Queensland on the weekend.
+  - REF: កម្មវិធីប្រណាំងត្រូវបានរំពឹងថានឹងប្រព្រឹត្តទូទាំងរដ្ឋនៅប្រទេសអូស្រ្តាលីលើកលែងតែញូវសោវែលនិងឃ្ខីនសាឡេននៅចុងសប្តាហ៍។
+  - A: Transformer from scratch: សូមបានានានាញាញ្ញាត់បាន។
+  - B: NLLB frozen backbone: ការរត់ត្រូវបានរំពឹងថានឹងបន្តទៀតនៅគ្រប់រដ្ឋអូស្ត្រាលី លើកលែងតែរដ្ឋណេសវ៉េ និងគីនសែលដ៍នៅចុងសប្តាហ៍នេះ។
+  - C: NLLB full fine-tuning: ការរត់គេចាត់ទុកថានឹងបន្តនៅទាំងអស់រដ្ឋអូស្ត្រាលី លើកលែងតែNSWនិងគិលានុបដ្ឋាយិកានៅចុងសប្តាហ៍។
+- EN: While Sydney's spring racing carnival has been canceled, Melbourne's is expected to kick off this weekend with the Caufield Cup.
+  - REF: ក្នុងពេលក្បូនហែរសំរាប់ប្រណាំងរដូវផ្ការីកនៅស៊ីតនីត្រូវលប់ចោល នៅមែលប៊ិន គេពិចារណាពីបើកឡើងវិញនៅចុងសប្តាហ៍នូវកម្មវិធីពាន់រង្វាន់ ឃូហ្វៀលខាប់។
+  - A: Transformer from scratch: វ៉ាវ អនាត់លើការបញ្ធាស៊ារារ។
+  - B: NLLB frozen backbone: ក្នុងអំឡុងពេល Carnival រត់ពណ៌ស្វាយរៀងនៅសៀមរាប ត្រូវបានលុបចោល, ក្រុងម៉ែលប៊ន ត្រូវបានរំពឹងថានឹងចាប់ផ្តើមចុងសប្តាហ៍នេះជាមួយពានរង្វាន់កំពង់ផែផ្កា។
+  - C: NLLB full fine-tuning: ខណៈដែល ពិធីជប់លៀងរដូវប្រាំងទីក្រុងស៊ីដនី ត្រូវបានលុបចោល, ក្រុងម៉េលប៊ឺន ត្រូវបានរំពឹងថានឹងចាប់ផ្តើមចុងសប្តាហ៍នេះជាមួយកៅហ្វែលដ៍កំពូល។
+- EN: The cup will be ran with special precautions in place to attempt to keep the state free of the virus.
+  - REF: ពាន់រង្វាន់នោះត្រូវអនុវត្តដោយប្រុងប្រយ័ត្នបំផុតជាងមុន ធ្វើយ៉ាងណារក្សាស្ថានភាពគ្មានមេរោគ។
+  - A: Transformer from scratch: កែវស៊ុសន្ត្ច្ញ្ធាសនាសនាយ។
+  - B: NLLB frozen backbone: កែវ នឹងត្រូវបានរត់ ជាមួយនឹងការយកចិត្តទុកដាក់ពិសេសនៅក្នុងកន្លែង ដើម្បីព្យាយាមរក្សាទុករដ្ឋ គ្មានវីរុស។
+  - C: NLLB full fine-tuning: កែវ នឹងដំណើរការ ជាមួយនឹង វិធានការប្រុងប្រយ័ត្ន ពិសេស នៅក្នុងទីកន្លែង ដើម្បីព្យាយាម រក្សាទុក រដ្ឋ រួចខ្លួនពីវីរុស។
+- EN: Contact between the general public and those working with the horses will be banned and Sydney-based jockeys Darren Beadman and Hugh Bowman and a number of interstate trainers including Bart Cummings are not allowed to take part.
+  - REF: ទំនាក់ទំនងរវាងប្រជាជនទូទៅនិងអ្នកធ្វើការខាងសេះត្រូវហាម ហើយអ្នកបញ្ចាសេះដារ៉េន ប៊ីតម៉ានដែលសិ្ថតនៅស៊ីដនី ព្រមទាំងគ្រូបណ្តើរសេះ ដែលរួមបញ្ចូលហូស ប៊ូម៉េន មិនត្រូវបានអនុញ្ញាតអោយចូលរួមឡើយ។
+  - A: Transformer from scratch: ខ្ញុំត្រូវមេចេញ្ធាញាញាមាមាមាម។
+  - B: NLLB frozen backbone: ការទាក់ទង រវាងសាធារណជនជាទូទៅ និងអ្នកធ្វើការជាមួយសេះ នឹងត្រូវបានហាមឃាត់ ហើយ អ្នកលេងកីឡាប្រចាំទីក្រុងស៊ីដនណេ ដារិន បេដាមន និងហ៊ុយ បាវម៉ន និងអ្នកហាត់ប្រាណជាច្រើនរួមមានបាតកម្ពុជា ត្រូវបានហាមឃាត់មិនឱ្យចូលរួម។
+  - C: NLLB full fine-tuning: ការទំនាក់ទំនងລະຫວ່າງសាធារណជនទូទៅនិងអ្នកធ្វើការជាមួយសេះ នឹងត្រូវបានហាមឃាត់ហើយ អ្នកលេងហ្គេមដែលមានមូលដ្ឋាននៅស៊ីដនី ដារាំង បេតាមង់និងហ៊ុយ ប៊ូម៉ង់ និងអ្នកបណ្តុះបណ្តាលថ្នាក់ក្រោមរដ្ឋ មួយចំនួនរួមមានបាតកែមិថុនា ត្រូវបានមិនអនុញ្ញាតឱ្យចូលរួម។
+- EN: Federal Minister for Agriculture, Peter McGauran said the spring carnival in Melbourne will remain "largely intact" despite losing some of the biggest names in Australian racing.
+  - REF: រដ្ឋមន្ត្រីកសិកម្មនៃសហព័ន្ធ ពីតទ័រ ម៉ាក់ស៊ីហ្គូរ៉ន បានមានប្រសាសន៍ថា ពិធីបុណ្យកានីវ៉ាល់រដូវផ្ការីកនៅទីក្រុងមែលប៊នត្រូវរក្សាទុក "គ្មានខូចខាតជាចំបង" ទោះបីជាបាត់បង់ឈ្មោះភាគច្រើនក្នុងចំណោមកម្មវិធីប្រណាំងនៅអូស្រ្តាលីក៏ដោយ។
+  - A: Transformer from scratch: េចេញាមាញ្ញ្ញាមាមេញាម។
+  - B: NLLB frozen backbone: រដ្ឋមន្ត្រីសហព័ន្ធសម្រាប់កសិកម្ម លោក Peter McGauran បាននិយាយថា ពិធីបុណ្យចូលឆ្នាំនៅម៉ែលប៊ន នឹងស្នាក់នៅ"នៅមិនប៉ះពាល់ជាច្រើន" ទោះបីជាបាត់បង់មួយចំនួននៃឈ្មោះធំជាងគេនៅក្នុងរត់ប្រណាំងអូស្ត្រាលី។
+  - C: NLLB full fine-tuning: រដ្ឋមន្ត្រីសហព័ន្ធសម្រាប់កសិកម្ម, ផេត្រាមកហួរន បាននិយាយថា ពិធីជប់លៀងនៅម៉េលប៊ឺន នឹងស្នាក់នៅ "មិនខូចភាគច្រើន" ទោះបីជាបាត់បង់មួយចំនួននៃឈ្មោះធំជាងគេនៅក្នុងរថយន្ដអូស្ត្រាលី។
+- EN: At least 11 people were killed Dec. 26 and 27 in neighborhood gang turf fights between drug dealers at shantytown "morro da Mineira" (Miner Hill) in the Catumbi neighborhood of Rio de Janeiro, Brazil.
+  - REF: យ៉ាងហោយណាស់មនុស្ស11នាគ់ត្រូវសម្លាប់នៅថ្ងៃទី26និង27ខែធ្នូ នៅជិតខាងរបស់ក្រុមបងធំដែលប្រយុទ្ថជាមួយអ្នកចែកចាយគ្រឿងញៀននៅតំបន់អនាធិបតេយ្យ "morro da Mineira"(ខ្ពង់រាបរ៉ែ)ដែលជិតនៅរីអូដឺហ្សានេរូ ប្រទេសប្រេស៊ីល។
+  - A: Transformer from scratch: េចេញាបញ្ចេញ្ញាមាមាមាម។
+  - B: NLLB frozen backbone: យ៉ាងហោចណាស់មនុស្ស១១នាក់ត្រូវបានសម្លាប់នៅថ្ងៃទី២៦ និង២៧ ខែ ធ្នូ នៅក្នុងការតវ៉ានៅក្នុងសួនច្បារជិតខាង រវាងអ្នកជួញដូរគ្រឿងញៀននៅឃ្លាំងទី១"morro da Mineira" (Miner Hill) នៅក្នុងឃុំកាតូប៊ីទីក្រុងរុស្ស៊ី។
+  - C: NLLB full fine-tuning: យ៉ាងតិចមនុស្ស១១ ត្រូវបានសម្លាប់ ថ្ងៃទី២៦និង២៧ ធ្នូ នៅក្នុងការប៉ះទង្គិចដីធ្លីរបស់ក្រុមចោរលួចក្នុងតំបន់ រវាងអ្នកលក់គ្រឿងញៀន នៅឃ្លាំងទំនើប "morro da Mineira" (កំពូលឧទ្ធម្ភាគចក្រ) នៅក្នុងតំបន់កាតុំប៊ីនៃរៀលឌីអេ,ប្រេស៊ីល។
+- EN: The region is controlled by rival gang Comando Vermelho (Red Command), which does not approve of other gangs selling drugs in the region.
+  - REF: តំបន់នោះត្រូវគ្រប់គ្រងដោយពួកបងធំត្រូវគេហៅថាComando Vermelho(បញ្ជាការក្រហម) ដែលមិនព្រមអោយក្រុមបងធំផ្សេងលក់គ្រឿងញៀននៅតំបន់នោះ។
+  - A: Transformer from scratch: អនាត់អាចាបញ្ញ្ញាមាមាមាម។
+  - B: NLLB frozen backbone: តំបន់ត្រូវបានគ្រប់គ្រងដោយក្រុមប្រឆាំង Comando Vermelho (Comando ពណ៌ក្រហម), ដែលមិនអនុម័តក្រុមផ្សេងទៀតលក់គ្រឿងញៀននៅក្នុងតំបន់។
+  - C: NLLB full fine-tuning: តំបន់ ត្រូវបានគ្រប់គ្រងដោយ ក្រុមឧទ្ទាមប្រជែង កាំមង់ដូ ពណ៌ក្រហម ដែលមិនអនុម័តលើ ក្រុមឧទ្ទាមដទៃទៀតលក់គ្រឿងញៀននៅក្នុងតំបន់។
+- EN: On Friday evening, an explosion in Chengdu, China caused partial shutdown of a facility operated by Foxconn, one of the world's biggest electronics manufacturers and a major supplier to companies like Hewlett-Packard, Dell, Sony, Apple, Motorola and Nokia.
+  - REF: ពេលល្ងាយថ្ងៃសុក្រ ការផ្ទុះកើតឡើងនៅទីក្រុងចេងទូ ប្រទេសចិនបណ្តាលឲ្យបិទមួយផ្នែកនៃរោងចក្រហ្វកកន ដែលជារោងចក្រផលិតឧបករណ៍អេឡិចត្រូនិចធំជាងគេមួយក្នុងពិភពលោកហើយជាអ្នកផ្គត់ផ្គងចម្បងសំរាប់ក្រុមហ៊ុននានាដូចជាហូវលេត ប៉ាកកាតើ ឌែល សូនី អេបផល ម៉ូតូរ៉ូឡា និងណូគា។
+  - A: Transformer from scratch: តើខ្ញុំអាចលេបចេញាបញ្ចេញ្ញាមាមាមាម។
+  - B: NLLB frozen backbone: កាលពីល្ងាចសុក្រ ការផ្ទុះឡើងនៅត្បូងឃ្មុំប្រទេសចិនបានបណ្តាលឱ្យបិទជាផ្នែកមួយនៃរោងចក្រដែលគ្រប់គ្រងដោយក្រុមហ៊ុនផ្កាយរណប, មួយក្នុងចំណោមអ្នកផលិតអេឡិចត្រូនិកធំបំផុតនៅលើពិភពលោក និងជាអ្នកផ្គត់ផ្គង់ដ៏សំខាន់ដល់ក្រុមហ៊ុនដូចជាហ៊ុយលេតប៉ិចហ្គាដ,ដែល,សុនី,អេប៊ុល,ម៉ូតូឡា និងណូគា។
+  - C: NLLB full fine-tuning: កាលពីល្ងាចថ្ងៃសុក្រ ការផ្ទុះឡើងនៅស្ទឹងត្រែងចិនបានបណ្តាលឱ្យមាន ការបិទជាផ្នែកមួយនៃការិយាល័យមួយដែលគ្រប់គ្រងដោយហ្វូសគុន, ម្នាក់ក្នុងចំណោមអ្នកផលិតអេឡិចត្រូនិកធំបំផុតនៅលើពិភពលោក និងអ្នកផ្គត់ផ្គង់ធំបំផុតដល់ក្រុមហ៊ុនមួយចំនួនដូចជាហ៊ុយលេតប៉ាកាដ,ដែល,សូណី,អេប៊ុល,ម៉ូតូឡានិងណូគីា។
+- EN: Initial investigations now suggest the explosion was caused by poor ventilation, which lead to high concentrations of combustible dust.
+  - REF: ការស្រាវជ្រាវដំបូងបានសង្ស័យថាការផ្ទុះបានកើតឡើងដោយខ្វះខ្យល់ចេញចូល ដែលនាំអោយប្រមូលផ្តុំនូវសារធាតុដែលងាយឆេះ។
+  - A: Transformer from scratch: ខ្ញុំបានទិញមាញុមទាន្ត្ត្ត្ត្ត្តី។
+  - B: NLLB frozen backbone: ការស៊ើបអង្កេតដំបូង ឥឡូវបង្ហាញថា ការផ្ទុះ ត្រូវបានបណ្តាលឱ្យដោយការអាកាសធាតុខ្វះខាត, ដែលបណ្តាលឱ្យមានការយកចិត្តទុកដាក់ខ្ពស់នៃកន្សែងឆេះ។
+  - C: NLLB full fine-tuning: ការស៊ើបអង្កេតទី១ ឥឡូវនេះបង្ហាញថា ការផ្ទុះ ត្រូវបានបណ្តាលឱ្យដោយការខ្យល់ខ្យល់ខ្វះខាត, ដែលបណ្តាលឱ្យមានការយកចិត្តទុកដាក់ខ្ពស់នៃគ្រាប់ធូលីផ្ទុះ។
+- EN: Foxconn halted production to investigate, saying "All operations at the affected workshop remain suspended and production at all other workshops that carry out similar processing functions have also been halted pending the results of the investigation. "
+  - REF: ហ្វកកនបានផ្អាកផលិតកម្មសំរាប់ការស៊ើបអង្កេតបាននិយាយថា"ប្រតិបត្តិការទាំងអស់ក្នុងការដ្ឋានការងារនៅសល់ត្រូវព្យូរហើយផលិតកម្មដែលមានមុខងារប្រហែលក្នុងការដ្ឋានទាំងអស់ក៏ត្រូវផ្អាករហូតដល់លទ្ធផលនៃការស៊ើបអង្កេត។"
+  - A: Transformer from scratch: ចងចាំក្នុងចិត្តថា្ត្ត្ចាញ្ញានានាន្ញាង។
+  - B: NLLB frozen backbone: ក្រុមហ៊ុន Foxconn បានបញ្ឈប់ការផលិត ដើម្បីស៊ើបអង្កេត ដោយបាននិយាយថា "គ្រប់សកម្មភាពនៅរោងជាងដែលរងផលប៉ះពាល់នៅតែត្រូវបានព្យួរ និងការផលិតនៅគ្រប់រោងជាងផ្សេងទៀតទាំងអស់ដែលអនុវត្តមុខងារកែច្នៃដដែលត្រូវបានបញ្ឈប់ផងដែរ នៅពេលរង់ចាំលទ្ធផលនៃការស៊ើបអង្កេត"។
+  - C: NLLB full fine-tuning: Foxconn បានបញ្ឈប់ការផលិត ដើម្បីស៊ើបអង្កេត ដោយបាននិយាយថា "ទាំងអស់ប្រតិបត្តិការនៅរោងជាងដែលរងផលប៉ះពាល់ នៅតែព្យួរ និងការផលិតនៅរោងជាងដទៃទៀតទាំងអស់ដែលអនុវត្តមុខងារកែច្នៃស្រដៀងគ្នានេះ ត្រូវបានបញ្ឈប់ផងដែរ ដោយរង់ចាំលទ្ធផលនៃការស៊ើបអង្កេត។"
+- EN: "All other production operations in our facilities in China continue operating normally."
+  - REF: "ប្រតិបត្តិការផលិតកម្មទាំងអស់នៅស្ថាប័នផ្សេងនៅទូទាំងប្រទេសចិននៅបន្តប្រតិបត្តិការដូចធម្មដា។"
+  - A: Transformer from scratch: ការបណ្ត្តិត្ញ្ញ្នាបញ្ញ្ញ្ញ្ញ្ញ្ត្នានានានានានានានាបញ្ត្ត្ញ្ញ្ញ្ញ្ញ្ញ្ញ្ញ្ញ្ញ្ញ្ញ្តន្តន្នានានានាន្ន្ន្ន្ន្ន្ន្ន្
+  - B: NLLB frozen backbone: "គ្រប់ដំណើរការផលិតផ្សេងទៀតនៅក្នុងរោងចក្ររបស់យើងនៅប្រទេសចិនបន្តដំណើរការជាធម្មតា"។
+  - C: NLLB full fine-tuning: "ទាំងអស់សកម្មភាពផលិតដទៃទៀតនៅក្នុងការិយាល័យរបស់ពួកយើងនៅចិន បន្តដំណើរការជាធម្មតា។"
+- EN: On Monday, city officials gave the cause as combustible dust in the air at a polishing workshop.
+  - REF: នៅថ្ងៃច័ន្ទ មន្ត្រីសាលាក្រុងបានប្រកាសពីមូលហេតុមកពីធូលីដែលងាយឆេះនៅក្នុងខ្យល់ក្នុងការដ្ឋានប៉ូលា។
+  - A: Transformer from scratch: នៅលើវេទិកាអនឡាញ ក្រុមសុខាភិបាលសាធារណៈុសនាសនាសុយ។
+  - B: NLLB frozen backbone: នៅថ្ងៃច័ន្ទ មន្ត្រីទីក្រុង បានផ្តល់មូលហេតុថាជាបំព្រកឆេះនៅក្នុងអាកាស នៅក្នុងរោងជាងបាញ់។
+  - C: NLLB full fine-tuning: កាលពីថ្ងៃច័ន្ទ មន្ត្រីទីក្រុង បានផ្តល់ មូលហេតុ ក្នុងនាមគ្រាប់ធញ្ញជាតិ នៅក្នុងអាកាស នៅរោងជាងកែលម្អ។
+- EN: After the explosion, they commented that workers were complaining "the ventilation of the department is poor. "
+  - REF: ក្រោយពេលផ្ទុះនោះពួកគេនិយាយថា​កម្មករបានរិះគន់"ខ្យល់ចេញចូលនៃផ្នែកនេះខ្សោយ។"
+  - A: Transformer from scratch: បន្ទាប់ពីការសនាន្ច្ច្ញ្ធានានានី។
+  - B: NLLB frozen backbone: បន្ទាប់ពីការបំផ្ទុះ ពួកគេបានអត្ថាធិប្បាយថា កម្មករ បានរិះគន់ថា "ការបង្ហូរទឹកនៅក្នុងសាលា គឺខ្វះខាត"។
+  - C: NLLB full fine-tuning: បន្ទាប់ពីការផ្ទុះ ពួកគេបានអធិប្បាយថា កម្មករ កំពុងតែតវ៉ាថា "ការបង្ហូរទឹករបស់ផ្នែក គឺ ក្រ។"
+- EN: "In the process, there is lots of aluminum (aluminium) dust floating in the air. "
+  - REF: "ក្នុងដំណើរការធូលីអាលមីញ៉ូមជាច្រើនអណ្តែតនៅក្នុងខ្យល់។"
+  - A: Transformer from scratch: ការចេញ្ញ្លាបញ្ញ្នាន្ញ្ញ្តី។
+  - B: NLLB frozen backbone: ក្នុងដំណើរការសម្រេចមានច្រើនសន្ធឹកសន្ធាប់នៃបំព្រកអាឡុយមីញ៉ូម (អាឡុយមីញ៉ូម) ហែលទឹកនៅក្នុងអាកាស។
+  - C: NLLB full fine-tuning: "ក្នុងការធ្វើនោះមានច្រើនសន្ធឹកសន្ធាប់នៃគ្រាប់អាលុយមីញ៉ូម (អាលុយមីញ៉ូម) ហែលទឹកនៅក្នុងអាកាស។ "
+- EN: Foxconn responded by saying the group was trying to "capitalize on the tragic accident" and misrepresented "Foxconn's commitment to the health and safety of our employees."
+  - REF: ហ្វកកនបានឆ្លើយថាក្រុមដែលព្យាយាម"ធ្វើជាទុននៅក្នុងគ្រោះថ្នាក់ដ៏ភ័យខ្លាច"និងផ្សព្វផ្សាយយ៉ាងលំអៀងថា "ហ្វកកនមិនគិតគូរពីរសុខភាពនិងសុវត្ថិភាពរបស់និយោជិករបស់យើងឡើយ។"
+  - A: Transformer from scratch: ខ្ញុំត្រូវតេញាញាញាញាញានានាប។
+  - B: NLLB frozen backbone: ក្រុមហ៊ុនផ្កាយរណប បានឆ្លើយតបដោយនិយាយថា ក្រុម បានព្យាយាម" capitalize ពីគ្រោះថ្នាក់ដ៏ភ្ញាក់ផ្អើល" និងបានធ្វើបទបង្ហាញខុស "ការប្តេជ្ញាចិត្តរបស់ក្រុមហ៊ុនផ្កាយរណបចំពោះសុខភាព និងសុវត្ថិភាពនៃកម្មកររបស់យើង"។
+  - C: NLLB full fine-tuning: Foxconn បានឆ្លើយតបដោយនិយាយថា ក្រុម កំពុងតែព្យាយាម"វិនិយោគលើ គ្រោះថ្នាក់ ដ៏ គួរឱ្យភ្ញាក់ផ្អើល" ហើយបានបង្ហាញខុស "ការប្តេជ្ញាចិត្តរបស់ Foxconnចំពោះសុខភាពនិងសុវត្ថិភាពនៃបុគ្គលិករបស់យើង។"
+- EN: Research group IHS iSuppli said the explosion may cause loss of production of 500,000 iPads during this quarter of the year.
+  - REF: ក្រុមស្រាវជ្រាវអាយអេកអេស អាយសាប់ព្លីបាននិយាយថាការផ្ទុះអាចធ្វើឲ្យខាតបង់ផលិតផលរបស់ អាយផេត 500,000ក្នុងឆមាសនៃឆ្នាំនេះ។
+  - A: Transformer from scratch: ជាទៀងទាត់អាចុមទាញ្ញ្ញ្ញានាញ្ញាម។
+  - B: NLLB frozen backbone: ក្រុមស្រាវជ្រាវ IHS iSuppli បាននិយាយថា ការផ្ទុះ អាចបណ្តាលឱ្យបាត់បង់ការផលិតរបស់ iPad ចំនួន ៥០០០,០០០ ក្នុងឆមាសនេះនៃឆ្នាំ។
+  - C: NLLB full fine-tuning: ក្រុមស្រាវជ្រាវ IHS iSuppli បាននិយាយថា ការផ្ទុះ អាចបណ្តាលឱ្យមាន ការបាត់បង់ការផលិតរបស់ iPad ចំនួន ៥០,០០០,០០០ ក្នុងត្រីមាសនេះនៃឆ្នាំ។
+- EN: A magnitude 5.8 earthquake has struck in a place where earthquakes are rare, but sometimes large.
+  - REF: រញ្ជួយផែនដីទំហំ5.8 បានកើតឡើងនៅកន្លែងមួយដែលកំរមានការរញ្ជួយ ប៉ុន្តែពេលខ្លះមានទំហំធំ។
+  - A: Transformer from scratch: ជារៀងរាល់ឆ្នាំបានអត់សុមក ៨ ៨ ៥។
+  - B: NLLB frozen backbone: ការរញ្ជួយដីកម្រិត 5.8 បានប៉ះពាល់នៅក្នុងកន្លែងដែលរញ្ជួយដីខ្វះខាត ប៉ុន្តែមានពេលខ្លះធំ។
+  - C: NLLB full fine-tuning: ការរញ្ជួយដីកម្រិត ៥,៨ បានវាយប្រហារ នៅក្នុងកន្លែងមួយដែលការរញ្ជួយដីថោកណាស់, តែ đôi khi ធំ។
+- EN: According to the United States Geological Survey (USGS), at 3:35 p.m (eastern time) the 5.8 quake struck in Antarctica, 105 kilometers (65 miles) south, southeast of Casey Station or 2565 kilometers (1590 miles) north of the South Pole.
+  - REF: យោងតាមពិនិត្យលើស្ថានភាពភូគព្ភសាស្ដ្ររបស់សហរដ្ឋអាមេរិក (USGS) នៅវេលាម៉ោង3:35ល្ងាច (ម៉ោងនៅភាគខាងកើត) ការរញ្ជួយទំហំ5.8 បានកើតឡើងនៅ Antarctica ចំងាយ105គីឡូម៉ែត្រ (65ម៉ែល៍)ខាងត្បូង ភាគអាគ្នេយ៍នៃ ស្ថានីយ Casey ឬ​ 2565គីឡូម៉ែត្រ (1590ម៉ែល៍) ខាងជើងនៃប៉ូលខាងត្បូង។
+  - A: Transformer from scratch: លិខិតផ្ទាបញាមេញាមាមាមាមាមាម។
+  - B: NLLB frozen backbone: យោងតាមផែនការភូមិសាស្ត្រសហរដ្ឋអាមេរិក (USGS) នៅម៉ោង៣និង៣៥រសៀល (ម៉ោងភាគខាងកើត) រញ្ជួយដី ៥.៨ បានប៉ះទង្គិចនៅអង់តារិកា, ១០៥គីឡូម៉ែត្រ (៦៥ម៉ែត្រ) ខាងត្បូង,ភាគខាងត្បូងនៃស្ថានីយ៍គេលី ឬ ២៥៦៥គីឡូម៉ែត្រ (១៥៩០ម៉ែត្រ) ភាគខាងជើងនៃកណ្តាល។
+  - C: NLLB full fine-tuning: យោងតាមការស្ទង់មតិភូមិសាស្ត្រសហរដ្ឋអាមេរិក (USGS) នៅម៉ោង៣និង៣៥ថ្ងៃត្រង់ម៉ោងកើតហេតុ រញ្ជួយដី ៥.៨ បានកើតឡើងនៅអង់តារិកា, ១០៥ គីឡូម៉ែត្រ ភាគខាងត្បូង, ភាគខាងត្បូងនៃស្ថានីយ៍កាសី ឬ ២៥៦៥ គីឡូម៉ែត្រ ភាគខាងជើងនៃពូលទីត្បូង។
+- EN: The quake was reported at a depth of 7.5 k.m. (4.7 miles), but the USGS says it was "poorly constrained."
+  - REF: ការរញ្ជួយនេះ ត្រូវបានគេរាយការណ៍ថាមានជំរៅដល់ទៅ 7.5គីឡូម៉ែត្រ (4.7ម៉ែល៍) ប៉ុន្តែ USGSនិយាយថា "វាមានផលប៉ះពាល់តិច។"
+  - A: Transformer from scratch: អយ្យានានាស៊ានានានានាប។
+  - B: NLLB frozen backbone: ការរញ្ជួយដីត្រូវបានរាយការណ៍នៅកម្ពស់ ៧.៥ គីឡូម៉ែត្រ (៤,៧ម៉ីល), ប៉ុន្តែ USGS និយាយថាវាមានកម្រិត"។
+  - C: NLLB full fine-tuning: ការរញ្ជួយដី ត្រូវបានរាយការណ៍នៅកម្រិតដីកាប្រមាណជា ៧,៥ គីឡូម៉ែត្រ, តែទីភ្នាក់ងារទេសចរណ៍សហរដ្ឋអាមេរិក និយាយថាវាមានកម្រិតខ្វះខាត។
+- EN: Had any civilization existed on the frozen ice cap, the USGS says that damage could be "light to moderate."
+  - REF: បើមានពពួកមានជីវិតនៅលើផ្ទាំងទឹកកក USGSនិយាយថាការខូចខាតអាចពី "ស្រាលទៅមធ្យម។"
+  - A: Transformer from scratch: អនុសបានអាច្ចុបញ្ធានាប់បាន។
+  - B: NLLB frozen backbone: ប្រសិនបើអរិយធម៌ណាមួយបានអវត្តមាននៅលើ ការកកកកកកកកកកកក, USGS និយាយថា ការខូចខាតអាច"ស្រាលដល់មធ្យម"។
+  - C: NLLB full fine-tuning: បើមាន អរិយធម៌ខ្លះមាននៅលើ កំពូលទឹកកក ដ៏ជីកក, USGS និយាយថា ការខូចខាត អាចមានពី ស្រាលដល់មធ្យម។
+- EN: Antarctica's biggest earthquake was a magnitude 8.1 which occurred on March 25, 1998 near the Balleny Islands of Antarctica.
+  - REF: ការរញ្ជួយដីធំជាងគេបំផុតនៅ Antarctica គឺមានទំហំ8.1ដែលបានកើតឡើងនៅថ្ងៃទី25 ខែមីនា ឆ្នាំ1998 ក្បែរប្រជុំកោះBalleny នៃAntarctica។
+  - A: Transformer from scratch: លិខិតផ្ទាញាញុមទាញ្ធានាន្ម។
+  - B: NLLB frozen backbone: គ្រោះថ្នាក់ដីកាដ៏ធំជាងគេនៅអង់តាកាសគឺក្រឡាប់ដីធ្លីកម្រិត8.1 ដែលកើតឡើងនៅថ្ងៃទី២៥ ខែមីនាឆ្នាំ១៩៩៨ នៅជិតកោះបាលែនីនៃអង់តាកាស។
+  - C: NLLB full fine-tuning: ការរញ្ជួយដីធំជាងគេនៅអន្តរជាតិភាគខាងត្បូងគឺកម្រិត8.1 ដែលកើតឡើងនៅថ្ងៃទី២៥ មីនាឆ្នាំ១៩៩៨ នៅជិតកោះឡែនីនៃអន្តរជាតិភាគខាងត្បូង។
+- EN: "We consider this depot a political shield that supports the Transnistrian regime," the President emphasized.
+  - REF: "ពួកយើងពិចារណាឃ្លាំងស្បៀងជាខែលនយោបាយមួយដែលគាំទ្ររបបត្រេនស្នីស្រ្ថីន"ប្រធានាធិបតីបានសង្កត់ធ្ងន់។
+  - A: Transformer from scratch: ចងចាំក្នុងចិត្តថាសនានិច្ចានានានានិចី។
+  - B: NLLB frozen backbone: ប្រធានាធិបតីបានលើកឡើងថា "យើងមើលថែទាំទីតាំងនេះជាអាវនាវាសន្តិសុខនយោបាយ ដែលគាំទ្រអាជ្ញាធរព្រៃនេសាទ។
+  - C: NLLB full fine-tuning: ប្រធានាធិបតីបានលើកឡើងថា "យើង ចាត់ទុក ឃ្លាំងសង្គ្រោះ នេះថា ជា អាវនាវនយោបាយ មួយ ដែលគាំទ្រ របបក្រុងដាណឺម៉ាក។

@@ -1,0 +1,42 @@
+{
+  "approach": "frozen",
+  "label": "B: NLLB frozen backbone",
+  "trainable_params": 50405376,
+  "total_params": 615073792,
+  "hyperparameters": {
+    "learning_rate": 0.0001,
+    "weight_decay": 0.01,
+    "dropout": 0.1,
+    "max_steps": 16000,
+    "effective_batch_size": 16,
+    "warmup_steps": 1600,
+    "optimizer": "adamw_torch",
+    "gradient_checkpointing": false,
+    "fp16": true,
+    "seed": 42
+  },
+  "steps_completed": 16000,
+  "examples_seen": 256000,
+  "train_step_seconds": 4190.5,
+  "seconds_per_step": 0.2619,
+  "wall_seconds": 5901.9,
+  "peak_vram_gb": 7.13,
+  "val_metrics": {
+    "loss": 1.072368860244751,
+    "chrf++": 56.7752,
+    "chrf": 62.567,
+    "bleu": 46.8659,
+    "runtime": 172.1007,
+    "samples_per_second": 5.811,
+    "steps_per_second": 0.366,
+    "epoch": 0.8195251875944375
+  },
+  "hardware": {
+    "python": "3.13.15",
+    "torch": "2.11.0+cu128",
+    "cuda": "12.8",
+    "gpu": "Tesla T4",
+    "gpu_memory_gb": 14.6
+  },
+  "timestamp": "2026-09-30T06:43:13+00:00"
+}

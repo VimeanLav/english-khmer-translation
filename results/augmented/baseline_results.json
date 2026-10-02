@@ -1,0 +1,18 @@
+{
+  "approach": "baseline",
+  "experiment": "augmented",
+  "test_set": "seyhalite",
+  "model": "facebook/nllb-200-distilled-600M",
+  "source_lang": "eng_Latn",
+  "target_lang": "khm_Khmr",
+  "split": "test",
+  "num_samples": 5000,
+  "num_beams": 4,
+  "chrf++": 40.5317,
+  "chrf": 50.3067,
+  "bleu": 13.6913,
+  "bleu_tokenizer": "flores200",
+  "inference_seconds": null,
+  "rescored_from": "baseline.jsonl",
+  "timestamp": "2026-09-30T08:18:25+00:00"
+}

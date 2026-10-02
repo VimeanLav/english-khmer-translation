@@ -1,0 +1,222 @@
+{
+  "test_set": "alt",
+  "fail_threshold_chrf++": 40.0,
+  "approaches": {
+    "baseline": {
+      "label": "Zero-shot NLLB-600M (reference)",
+      "sentences": 1018,
+      "failures": 678,
+      "failure_rate_pct": 66.6,
+      "categories": {
+        "exact_match": 0,
+        "spacing_only": 0,
+        "partially_correct": 340,
+        "empty_output": 0,
+        "wrong_script": 7,
+        "repetition_hallucination": 39,
+        "omission": 8,
+        "number_mismatch": 97,
+        "unseen_source_word": 320,
+        "lexical_semantic": 207
+      },
+      "categories_pct": {
+        "exact_match": 0.0,
+        "spacing_only": 0.0,
+        "partially_correct": 33.4,
+        "empty_output": 0.0,
+        "wrong_script": 0.69,
+        "repetition_hallucination": 3.83,
+        "omission": 0.79,
+        "number_mismatch": 9.53,
+        "unseen_source_word": 31.43,
+        "lexical_semantic": 20.33
+      },
+      "chrf_by_source_length": {
+        "1-4": {
+          "sentences": 0,
+          "mean_sentence_chrf++": null
+        },
+        "5-7": {
+          "sentences": 1,
+          "mean_sentence_chrf++": 41.66
+        },
+        "8-10": {
+          "sentences": 36,
+          "mean_sentence_chrf++": 35.08
+        },
+        "11-13": {
+          "sentences": 126,
+          "mean_sentence_chrf++": 34.82
+        },
+        "14+": {
+          "sentences": 855,
+          "mean_sentence_chrf++": 35.87
+        }
+      }
+    },
+    "scratch": {
+      "label": "A: Transformer from scratch",
+      "sentences": 1018,
+      "failures": 781,
+      "failure_rate_pct": 76.72,
+      "categories": {
+        "exact_match": 0,
+        "spacing_only": 0,
+        "partially_correct": 237,
+        "empty_output": 0,
+        "wrong_script": 0,
+        "repetition_hallucination": 29,
+        "omission": 5,
+        "number_mismatch": 79,
+        "unseen_source_word": 388,
+        "lexical_semantic": 280
+      },
+      "categories_pct": {
+        "exact_match": 0.0,
+        "spacing_only": 0.0,
+        "partially_correct": 23.28,
+        "empty_output": 0.0,
+        "wrong_script": 0.0,
+        "repetition_hallucination": 2.85,
+        "omission": 0.49,
+        "number_mismatch": 7.76,
+        "unseen_source_word": 38.11,
+        "lexical_semantic": 27.5
+      },
+      "chrf_by_source_length": {
+        "1-4": {
+          "sentences": 0,
+          "mean_sentence_chrf++": null
+        },
+        "5-7": {
+          "sentences": 1,
+          "mean_sentence_chrf++": 17.5
+        },
+        "8-10": {
+          "sentences": 36,
+          "mean_sentence_chrf++": 33.15
+        },
+        "11-13": {
+          "sentences": 126,
+          "mean_sentence_chrf++": 33.55
+        },
+        "14+": {
+          "sentences": 855,
+          "mean_sentence_chrf++": 33.73
+        }
+      }
+    },
+    "frozen": {
+      "label": "B: NLLB frozen backbone",
+      "sentences": 1018,
+      "failures": 431,
+      "failure_rate_pct": 42.34,
+      "categories": {
+        "exact_match": 0,
+        "spacing_only": 0,
+        "partially_correct": 587,
+        "empty_output": 0,
+        "wrong_script": 1,
+        "repetition_hallucination": 19,
+        "omission": 1,
+        "number_mismatch": 4,
+        "unseen_source_word": 256,
+        "lexical_semantic": 150
+      },
+      "categories_pct": {
+        "exact_match": 0.0,
+        "spacing_only": 0.0,
+        "partially_correct": 57.66,
+        "empty_output": 0.0,
+        "wrong_script": 0.1,
+        "repetition_hallucination": 1.87,
+        "omission": 0.1,
+        "number_mismatch": 0.39,
+        "unseen_source_word": 25.15,
+        "lexical_semantic": 14.73
+      },
+      "chrf_by_source_length": {
+        "1-4": {
+          "sentences": 0,
+          "mean_sentence_chrf++": null
+        },
+        "5-7": {
+          "sentences": 1,
+          "mean_sentence_chrf++": 22.41
+        },
+        "8-10": {
+          "sentences": 36,
+          "mean_sentence_chrf++": 40.68
+        },
+        "11-13": {
+          "sentences": 126,
+          "mean_sentence_chrf++": 42.95
+        },
+        "14+": {
+          "sentences": 855,
+          "mean_sentence_chrf++": 42.34
+        }
+      }
+    },
+    "full": {
+      "label": "C: NLLB full fine-tuning",
+      "sentences": 1018,
+      "failures": 458,
+      "failure_rate_pct": 44.99,
+      "categories": {
+        "exact_match": 0,
+        "spacing_only": 0,
+        "partially_correct": 560,
+        "empty_output": 0,
+        "wrong_script": 0,
+        "repetition_hallucination": 32,
+        "omission": 0,
+        "number_mismatch": 1,
+        "unseen_source_word": 272,
+        "lexical_semantic": 153
+      },
+      "categories_pct": {
+        "exact_match": 0.0,
+        "spacing_only": 0.0,
+        "partially_correct": 55.01,
+        "empty_output": 0.0,
+        "wrong_script": 0.0,
+        "repetition_hallucination": 3.14,
+        "omission": 0.0,
+        "number_mismatch": 0.1,
+        "unseen_source_word": 26.72,
+        "lexical_semantic": 15.03
+      },
+      "chrf_by_source_length": {
+        "1-4": {
+          "sentences": 0,
+          "mean_sentence_chrf++": null
+        },
+        "5-7": {
+          "sentences": 1,
+          "mean_sentence_chrf++": 38.44
+        },
+        "8-10": {
+          "sentences": 36,
+          "mean_sentence_chrf++": 40.86
+        },
+        "11-13": {
+          "sentences": 126,
+          "mean_sentence_chrf++": 41.77
+        },
+        "14+": {
+          "sentences": 855,
+          "mean_sentence_chrf++": 41.43
+        }
+      }
+    }
+  },
+  "hard_for_all_trained": {
+    "approaches": [
+      "scratch",
+      "frozen",
+      "full"
+    ],
+    "sentences": 363
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "approach": "frozen",
+  "experiment": "base",
+  "test_set": "alt",
+  "model": "C:\\Users\\lavvi\\english-khmer-translation\\models\\nllb_frozen",
+  "source_lang": "eng_Latn",
+  "target_lang": "khm_Khmr",
+  "split": "test",
+  "num_samples": 1018,
+  "num_beams": 4,
+  "chrf++": 34.4885,
+  "chrf": 44.238,
+  "bleu": 21.1832,
+  "bleu_tokenizer": "flores200",
+  "inference_seconds": 102.68,
+  "rescored_from": null,
+  "timestamp": "2026-09-29T04:21:50+00:00"
+}
