@@ -557,11 +557,11 @@ Set `EXPERIMENT=augmented` first to use experiment 2's models.
 | Approach | Size | Location |
 |---|---|---|
 | A: scratch | ~46 MB | [`models/scratch/`](models/scratch/) (in this repository) |
-| B: frozen backbone (16,000-step final model) | ~1.2 GB (fp16) | ⏳ *Google Drive link to `models/nllb_frozen/`* |
-| C: full fine-tuning | ~1.2 GB (fp16) | ⏳ *Google Drive link to `models/nllb_full/`* |
+| B: frozen backbone (16,000-step final model) | ~1.2 GB (fp16) | [Google Drive: `models/nllb_frozen/`](https://drive.google.com/drive/folders/1Q5LEdSHxRAQmPObOZtB4L07ZWk0OU-rA) |
+| C: full fine-tuning | ~1.2 GB (fp16) | [Google Drive: `models/nllb_full/`](https://drive.google.com/drive/folders/1RZsgHOcoscO7cjrTxvfHeT7aTzzrYi6N) |
 | Experiment 2, A: scratch | ~46 MB | [`models/augmented/scratch/`](models/augmented/scratch/) (in this repository) |
-| Experiment 2, B: frozen backbone | ~1.2 GB (fp16) | ⏳ *Google Drive link to `models/augmented/nllb_frozen/`* |
-| Experiment 2, C: full fine-tuning | ~1.2 GB (fp16) | ⏳ *Google Drive link to `models/augmented/nllb_full/`* |
+| Experiment 2, B: frozen backbone | ~1.2 GB (fp16) | [Google Drive: `models/augmented/nllb_frozen/`](https://drive.google.com/drive/folders/1IaJYXSLDHZZdzQOTlsP7WkEiffAzZrKo) |
+| Experiment 2, C: full fine-tuning | ~1.2 GB (fp16) | [Google Drive: `models/augmented/nllb_full/`](https://drive.google.com/drive/folders/1CPvvFaV3VOK0NJuzlGzmIYmDhxSJrIHl) |
 
 To evaluate downloaded weights, place them in `models/` (experiment 2: `models/augmented/`) and run `python -m src.evaluate --approach frozen` (or `full` / `scratch`). For experiment 2, set `EXPERIMENT=augmented` first.
 
@@ -601,4 +601,7 @@ To evaluate downloaded weights, place them in `models/` (experiment 2: `models/a
     - The author ran the notebook on Colab.
     - Claude produced the tables, figures and error analysis, the qualitative probe and §10 from the result files.
   - **Demo:** Claude wrote the command-line translator (`src/translate.py`) and the Streamlit demo (`demo/app.py`).
-- **Verification:** ⏳ *Describe what you personally checked. For example: which files you read and can explain, that you reviewed sample translations in `results/predictions/`, and which parts of the analysis you rewrote in your own words.*
+- **Verification by the author:**
+  - I ran both Colab notebooks myself and checked each cell's output.
+  - I tested the trained models on my own sentences in the Streamlit web demo.
+  - As a Khmer speaker, I wrote a qualitative evaluation report on everyday sentences. It found that model A produced unreadable output and that model B mistranslated common words (e.g. "kiss"). That report led to experiment 2, and I chose its design: adding ALT, keeping experiment 1 for comparison, and testing on ALT plus my own sentences.
