@@ -507,7 +507,7 @@ python -m src.compare_experiments              # experiment 1 vs. 2 table + figu
 python -m src.translate --approach frozen,scratch "Where is the nearest hospital?"
 pip install -r demo/requirements.txt && python -m streamlit run demo/app.py   # web demo
 ```
-Set `EXPERIMENT=augmented` first to use experiment 2's models.
+The web demo always uses experiment 2's models (A, B and C). For the command-line translator, set `EXPERIMENT=augmented` first to use experiment 2's models; otherwise it uses experiment 1's.
 
 ## 13. Repository structure
 

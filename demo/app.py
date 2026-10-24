@@ -1,5 +1,7 @@
 """Streamlit web demo: translate English to Khmer with the trained models.
 
+The demo always uses experiment 2's models (SeyhaLite + ALT): A, B and C.
+
 Run from the project root:
 
     python -m streamlit run demo/app.py
@@ -11,12 +13,16 @@ from __future__ import annotations
 
 import html
 import json
+import os
 import sys
 from pathlib import Path
 
 # Make the project's `src` package importable when Streamlit runs this file.
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(PROJECT_ROOT))
+
+# Must be set before importing src.config, which reads it to choose the model folders.
+os.environ["EXPERIMENT"] = "augmented"
 
 import streamlit as st  # noqa: E402
 import torch  # noqa: E402
